@@ -17,74 +17,110 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 tester_role = "tester"
 
+rm2_server_id = 859685499441512478
+rm2_global_shout_user_id = 939082155483598858
+lanz_user_id = 71730438560813056
+lanz_server_id = 1387179883637244064
+lanz_server_channel_id_general = 1387179884375179446
+lanz_server_channel_id_alerts = 1387513258784718898
+lanz2_server_id = 1387519724933480520
+lanz2_server_channel_id_general = 1387519726225461482
 
 # some stuff to test bot commands
 
-@bot.event
-async def on_ready():
-    print(f"We are ready to go in, {bot.user.name}")
+# Example channel IDs - replace these with your actual channel IDs
+example_channel_id = 1234567890123456789
+example_server_id = 1387519724933480520
 
 @bot.event
-async def on_member_join(member):
-    await member.send(f"Welcome to the server, {member.name}")
+async def on_ready():
+    print(f"{bot.user.name} is here to defeat the Sun!")
+
+
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
+    if message.author.id == lanz_user_id and message.channel.id == lanz2_server_channel_id_general:
+        alert_channel = bot.get_channel(lanz_server_channel_id_alerts)
+        if alert_channel:
+            if "food shop war is starting in 15 minutes" in message.content.lower():
+                await alert_channel.send("Food Shop War starts in 15 minutes!")
+
+            if "hq war starting in 5 minutes!" in message.content.lower():
+                await alert_channel.send("HQ War starts in 5 minutes!")
+
+            if "sky skirmish complete, join the uni raid within 5 minutes" in message.content.lower():
+                await alert_channel.send("Uni open for 5 minutes")
+
+            if "sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes" in message.content.lower():
+                await alert_channel.send("Uni Dungeon open for 5 minutes")
+
+            if "battle dimension starts in 30 minutes" in message.content.lower():
+                await alert_channel.send("Battle Dimension opens in 30 minutes")
+
+            if "battle simulation opens in 5 minutes!" in message.content.lower():
+                await alert_channel.send("Battle Simulation opens in 5 minutes!")
+        else:
+            print(f"Could not find channel with ID: {lanz_server_channel_id_alerts}")
     
-    if "dang" in message.content.lower():
-        await message.delete()
-        await message.channel.send(f"{message.author.mention} - don't use that word!")
 
     await bot.process_commands(message)
 
-@bot.command()
-async def hello(ctx):
-    await ctx.send(f"Hello {ctx.author.mention}!")
 
-@bot.command()
-async def assign(ctx):
-    role = discord.utils.get(ctx.guild.roles, name=tester_role)
-    if role:
-        await ctx.author.add_roles(role)
-        await ctx.send(f"{ctx.author.mention} is now assigned to {tester_role}")
-    else:
-        await ctx.send("Role doesn't exist")
+# just trying things out
 
-@bot.command()
-async def remove(ctx):
-    role = discord.utils.get(ctx.guild.roles, name=tester_role)
-    if role:
-        await ctx.author.remove_roles(role)
-        await ctx.send(f"{ctx.author.mention} has had the role '{tester_role}' removed")
-    else:
-        await ctx.send("Role doesn't exist")
+# @bot.event
+# async def on_member_join(member):
+#     await member.send(f"Welcome to the server, {member.name}")
 
-@bot.command()
-async def dm(ctx, *, msg):
-    await ctx.author.send(f"You said {msg}")
+# @bot.command()
+# async def hello(ctx):
+#     await ctx.send(f"Hello {ctx.author.mention}!")
 
-@bot.command()
-async def reply(ctx):
-    await ctx.reply("This is a reply to your message!")
+# @bot.command()
+# async def assign(ctx):
+#     role = discord.utils.get(ctx.guild.roles, name=tester_role)
+#     if role:
+#         await ctx.author.add_roles(role)
+#         await ctx.send(f"{ctx.author.mention} is now assigned to {tester_role}")
+#     else:
+#         await ctx.send("Role doesn't exist")
 
-@bot.command()
-async def poll(ctx, *, question):
-    embed = discord.Embed(title="New Poll", description=question)
-    poll_message = await ctx.send(embed=embed)
-    await poll_message.add_reaction("👍")
-    await poll_message.add_reaction("👎")
+# @bot.command()
+# async def remove(ctx):
+#     role = discord.utils.get(ctx.guild.roles, name=tester_role)
+#     if role:
+#         await ctx.author.remove_roles(role)
+#         await ctx.send(f"{ctx.author.mention} has had the role '{tester_role}' removed")
+#     else:
+#         await ctx.send("Role doesn't exist")
 
-@bot.command()
-@commands.has_role(tester_role)
-async def secret(ctx):
-    await ctx.send("Welcome to the club!")
+# @bot.command()
+# async def dm(ctx, *, msg):
+#     await ctx.author.send(f"You said {msg}")
 
-@secret.error
-async def secret_error(ctx, error):
-    if isinstance(error, commands.MissingRole):
-        await ctx.send("You do not have permission to join the club.")
+# @bot.command()
+# async def reply(ctx):
+#     await ctx.reply("This is a reply to your message!")
+
+# @bot.command()
+# async def poll(ctx, *, question):
+#     embed = discord.Embed(title="New Poll", description=question)
+#     poll_message = await ctx.send(embed=embed)
+#     await poll_message.add_reaction("👍")
+#     await poll_message.add_reaction("👎")
+
+# @bot.command()
+# @commands.has_role(tester_role)
+# async def secret(ctx):
+#     await ctx.send("Welcome to the club!")
+
+# @secret.error
+# async def secret_error(ctx, error):
+#     if isinstance(error, commands.MissingRole):
+#         await ctx.send("You do not have permission to join the club.")
 
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
