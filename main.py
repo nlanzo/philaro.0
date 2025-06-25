@@ -12,10 +12,11 @@ handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w"
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+intents.guilds = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-tester_role = "tester"
+alerts_role = "rm2-alerts"
 
 rm2_server_id = 859685499441512478
 rm2_global_shout_user_id = 939082155483598858
@@ -26,16 +27,11 @@ lanz_server_channel_id_alerts = 1387513258784718898
 lanz2_server_id = 1387519724933480520
 lanz2_server_channel_id_general = 1387519726225461482
 
-# some stuff to test bot commands
 
-# Example channel IDs - replace these with your actual channel IDs
-example_channel_id = 1234567890123456789
-example_server_id = 1387519724933480520
 
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} is here to defeat the Sun!")
-
 
 
 @bot.event
@@ -43,28 +39,29 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if message.author.id == lanz_user_id and message.channel.id == lanz2_server_channel_id_general:
-        alert_channel = bot.get_channel(lanz_server_channel_id_alerts)
-        if alert_channel:
-            if "food shop war is starting in 15 minutes" in message.content.lower():
-                await alert_channel.send("Food Shop War starts in 15 minutes!")
+        # Send alerts to "rm2-alerts" channel in all guilds where bot is installed
+        for guild in bot.guilds:
+            alert_channel = discord.utils.get(guild.channels, name="rm2-alerts")
+            if alert_channel:
+                if "food shop war is starting in 15 minutes" in message.content.lower():
+                    await alert_channel.send("Food Shop War starts in 15 minutes!")
 
-            if "hq war starting in 5 minutes!" in message.content.lower():
-                await alert_channel.send("HQ War starts in 5 minutes!")
+                if "hq war starting in 5 minutes!" in message.content.lower():
+                    await alert_channel.send("HQ War starts in 5 minutes!")
 
-            if "sky skirmish complete, join the uni raid within 5 minutes" in message.content.lower():
-                await alert_channel.send("Uni open for 5 minutes")
+                if "sky skirmish complete, join the uni raid within 5 minutes" in message.content.lower():
+                    await alert_channel.send("Uni open for 5 minutes")
 
-            if "sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes" in message.content.lower():
-                await alert_channel.send("Uni Dungeon open for 5 minutes")
+                if "sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes" in message.content.lower():
+                    await alert_channel.send("Uni Dungeon open for 5 minutes")
 
-            if "battle dimension starts in 30 minutes" in message.content.lower():
-                await alert_channel.send("Battle Dimension opens in 30 minutes")
+                if "battle dimension starts in 30 minutes" in message.content.lower():
+                    await alert_channel.send("Battle Dimension opens in 30 minutes")
 
-            if "battle simulation opens in 5 minutes!" in message.content.lower():
-                await alert_channel.send("Battle Simulation opens in 5 minutes!")
-        else:
-            print(f"Could not find channel with ID: {lanz_server_channel_id_alerts}")
-    
+                if "battle simulation opens in 5 minutes!" in message.content.lower():
+                    await alert_channel.send("Battle Simulation opens in 5 minutes!")
+            else:
+                print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
 
     await bot.process_commands(message)
 
