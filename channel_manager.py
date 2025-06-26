@@ -153,4 +153,4 @@ async def setup_guild_for_user(guild, user):
         await user.send(f"Sorry, I don't have permission to create the {ALERTS_CHANNEL_NAME} channel in {guild.name}. Please ask an administrator to create it.")
         return None
     
-    return alerts_role 
+    return alerts_role

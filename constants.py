@@ -1,8 +1,11 @@
+# alert setup variables
 ALERTS_ROLE_NAME = "rm2-alerts"
 ALERTS_CHANNEL_NAME = "rm2-alerts"
 ALERTS_SETUP_CHANNEL_NAME = "rm2-alerts-setup"
 
+# rm2 server variables
 RM2_SERVER_ID = 859685499441512478
+RM2_SERVER_CHANNEL_ID_GLOBAL = 939091598216675338
 RM2_GLOBAL_SHOUT_USER_ID = 939082155483598858
 
 # testing variables
