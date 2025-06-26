@@ -27,12 +27,83 @@ lanz_server_channel_id_alerts = 1387513258784718898
 lanz2_server_id = 1387519724933480520
 lanz2_server_channel_id_general = 1387519726225461482
 
+origin_server_id = lanz2_server_id
+
 
 
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} is here to defeat the Sun!")
+    
+    # Create role assignment message in rm2-alerts-setup channels
+    for guild in bot.guilds:
+        if guild.id == origin_server_id:
+            continue
+        setup_channel = discord.utils.get(guild.channels, name="rm2-alerts-setup")
+        if setup_channel:
+            # Check if there's already a role assignment message
+            async for message in setup_channel.history(limit=50):
+                if message.author == bot.user and "React to this message to subscribe to rm2 alerts on this server" in message.content:
+                    # Message already exists, add reaction if not present
+                    if not message.reactions:
+                        await message.add_reaction("🔔")
+                    break
+            else:
+                # No existing message found, create a new one
+                role_message = await setup_channel.send("React to this message to subscribe to rm2 alerts on this server")
+                await role_message.add_reaction("🔔")
 
+@bot.event
+async def on_raw_reaction_add(payload):
+    # Check if the reaction is in a rm2-alerts-setup channel
+    if payload.channel_id:
+        channel = bot.get_channel(payload.channel_id)
+        if channel and channel.name == "rm2-alerts-setup":
+            # Check if it's the bell emoji
+            if payload.emoji.name == "🔔":
+                guild = bot.get_guild(payload.guild_id)
+                user = guild.get_member(payload.user_id)
+                
+                # Don't assign role to the bot itself
+                if user == bot.user:
+                    return
+                
+                # Get the rm2-alerts role
+                alerts_role = discord.utils.get(guild.roles, name="rm2-alerts")
+                if alerts_role:
+                    try:
+                        await user.add_roles(alerts_role)
+                        await user.send(f"You have been subscribed to rm2 alerts in {guild.name}!")
+                    except discord.Forbidden:
+                        print(f"Bot doesn't have permission to assign role in {guild.name}")
+                    except Exception as e:
+                        print(f"Error assigning role in {guild.name}: {e}")
+                else:
+                    print(f"rm2-alerts role not found in {guild.name}")
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    # Check if the reaction is in a rm2-alerts-setup channel
+    if payload.channel_id:
+        channel = bot.get_channel(payload.channel_id)
+        if channel and channel.name == "rm2-alerts-setup":
+            # Check if it's the bell emoji
+            if payload.emoji.name == "🔔":
+                guild = bot.get_guild(payload.guild_id)
+                user = guild.get_member(payload.user_id)
+                
+                # Get the rm2-alerts role
+                alerts_role = discord.utils.get(guild.roles, name="rm2-alerts")
+                if alerts_role:
+                    try:
+                        await user.remove_roles(alerts_role)
+                        await user.send(f"You have been unsubscribed from rm2 alerts in {guild.name}!")
+                    except discord.Forbidden:
+                        print(f"Bot doesn't have permission to remove role in {guild.name}")
+                    except Exception as e:
+                        print(f"Error removing role in {guild.name}: {e}")
+                else:
+                    print(f"rm2-alerts role not found in {guild.name}")
 
 @bot.event
 async def on_message(message):
@@ -43,23 +114,27 @@ async def on_message(message):
         for guild in bot.guilds:
             alert_channel = discord.utils.get(guild.channels, name="rm2-alerts")
             if alert_channel:
+                # Get the rm2-alerts role for this guild
+                alerts_role = discord.utils.get(guild.roles, name="rm2-alerts")
+                role_mention = alerts_role.mention if alerts_role else "@rm2-alerts"
+                
                 if "food shop war is starting in 15 minutes" in message.content.lower():
-                    await alert_channel.send("Food Shop War starts in 15 minutes!")
+                    await alert_channel.send(f"{role_mention} Food Shop War starts in 15 minutes!")
 
                 if "hq war starting in 5 minutes!" in message.content.lower():
-                    await alert_channel.send("HQ War starts in 5 minutes!")
+                    await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
 
                 if "sky skirmish complete, join the uni raid within 5 minutes" in message.content.lower():
-                    await alert_channel.send("Uni open for 5 minutes")
+                    await alert_channel.send(f"{role_mention} Uni open for 5 minutes")
 
                 if "sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes" in message.content.lower():
-                    await alert_channel.send("Uni Dungeon open for 5 minutes")
+                    await alert_channel.send(f"{role_mention} Uni Dungeon open for 5 minutes")
 
                 if "battle dimension starts in 30 minutes" in message.content.lower():
-                    await alert_channel.send("Battle Dimension opens in 30 minutes")
+                    await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
 
                 if "battle simulation opens in 5 minutes!" in message.content.lower():
-                    await alert_channel.send("Battle Simulation opens in 5 minutes!")
+                    await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
             else:
                 print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
 
