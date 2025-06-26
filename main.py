@@ -3,6 +3,8 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
+from constants import *
+
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
@@ -16,19 +18,7 @@ intents.guilds = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-alerts_role = "rm2-alerts"
-
-rm2_server_id = 859685499441512478
-rm2_global_shout_user_id = 939082155483598858
-lanz_user_id = 71730438560813056
-lanz_server_id = 1387179883637244064
-lanz_server_channel_id_general = 1387179884375179446
-lanz_server_channel_id_alerts = 1387513258784718898
-lanz2_server_id = 1387519724933480520
-lanz2_server_channel_id_general = 1387519726225461482
-
-origin_server_id = lanz2_server_id
-
+origin_server_id = LANZ2_SERVER_ID
 
 
 @bot.event
@@ -39,26 +29,102 @@ async def on_ready():
     for guild in bot.guilds:
         if guild.id == origin_server_id:
             continue
-        setup_channel = discord.utils.get(guild.channels, name="rm2-alerts-setup")
-        if setup_channel:
-            # Check if there's already a role assignment message
-            async for message in setup_channel.history(limit=50):
-                if message.author == bot.user and "React to this message to subscribe to rm2 alerts on this server" in message.content:
-                    # Message already exists, add reaction if not present
-                    if not message.reactions:
-                        await message.add_reaction("🔔")
-                    break
-            else:
-                # No existing message found, create a new one
-                role_message = await setup_channel.send("React to this message to subscribe to rm2 alerts on this server")
-                await role_message.add_reaction("🔔")
+        
+        # Check if rm2-alerts-setup channel exists, create if it doesn't
+        setup_channel = discord.utils.get(guild.channels, name=ALERTS_SETUP_CHANNEL_NAME)
+        if not setup_channel:
+            try:
+                # Create channel with specific permissions
+                overwrites = {
+                    guild.default_role: discord.PermissionOverwrite(
+                        send_messages=False,  # Everyone can't send messages
+                        read_messages=True,   # Everyone can read messages
+                        add_reactions=True    # Everyone can react
+                    ),
+                    guild.me: discord.PermissionOverwrite(
+                        send_messages=True,   # Bot can send messages
+                        read_messages=True,   # Bot can read messages
+                        add_reactions=True,   # Bot can add reactions
+                        manage_channels=True  # Bot can manage the channel
+                    )
+                }
+                
+                setup_channel = await guild.create_text_channel(
+                    name=ALERTS_SETUP_CHANNEL_NAME,
+                    topic="Click the bell 🔔 to subscribe to rm2 alerts on this server",
+                    reason="Auto-created for rm2 alerts setup",
+                    overwrites=overwrites
+                )
+                print(f"Created {ALERTS_SETUP_CHANNEL_NAME} channel in {guild.name}")
+            except discord.Forbidden:
+                print(f"Bot doesn't have permission to create channels in {guild.name}")
+                continue
+            except Exception as e:
+                print(f"Error creating channel in {guild.name}: {e}")
+                continue
+        
+        # Ensure rm2-alerts role exists
+        alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
+        if not alerts_role:
+            try:
+                alerts_role = await guild.create_role(
+                    name=ALERTS_ROLE_NAME,
+                    color=discord.Color.red(),
+                    reason="Auto-created for rm2 alerts system"
+                )
+                print(f"Created {ALERTS_ROLE_NAME} role in {guild.name}")
+            except discord.Forbidden:
+                print(f"Bot doesn't have permission to create roles in {guild.name}")
+            except Exception as e:
+                print(f"Error creating role in {guild.name}: {e}")
+        
+        # Ensure rm2-alerts channel exists
+        alerts_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
+        if not alerts_channel:
+            try:
+                # Create alerts channel with specific permissions
+                alerts_overwrites = {
+                    guild.default_role: discord.PermissionOverwrite(
+                        read_messages=True,   # Everyone can read alerts
+                        send_messages=False   # Only bot can send alerts
+                    ),
+                    guild.me: discord.PermissionOverwrite(
+                        send_messages=True,   # Bot can send alerts
+                        read_messages=True,   # Bot can read messages
+                        manage_channels=True  # Bot can manage the channel
+                    )
+                }
+                
+                alerts_channel = await guild.create_text_channel(
+                    name=ALERTS_CHANNEL_NAME,
+                    topic="Alerts for Wars/BD/BSIM/Uni/FV",
+                    reason="Auto-created for rm2 alerts",
+                    overwrites=alerts_overwrites
+                )
+                print(f"Created {ALERTS_CHANNEL_NAME} channel in {guild.name}")
+            except discord.Forbidden:
+                print(f"Bot doesn't have permission to create channels in {guild.name}")
+            except Exception as e:
+                print(f"Error creating alerts channel in {guild.name}: {e}")
+        
+        # Check if there's already a role assignment message
+        async for message in setup_channel.history(limit=50):
+            if message.author == bot.user and "React to this message to subscribe to rm2 alerts on this server" in message.content:
+                # Message already exists, add reaction if not present
+                if not message.reactions:
+                    await message.add_reaction("🔔")
+                break
+        else:
+            # No existing message found, create a new one
+            role_message = await setup_channel.send("React to this message to subscribe to rm2 alerts on this server")
+            await role_message.add_reaction("🔔")
 
 @bot.event
 async def on_raw_reaction_add(payload):
     # Check if the reaction is in a rm2-alerts-setup channel
     if payload.channel_id:
         channel = bot.get_channel(payload.channel_id)
-        if channel and channel.name == "rm2-alerts-setup":
+        if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
             # Check if it's the bell emoji
             if payload.emoji.name == "🔔":
                 guild = bot.get_guild(payload.guild_id)
@@ -68,54 +134,101 @@ async def on_raw_reaction_add(payload):
                 if user == bot.user:
                     return
                 
-                # Get the rm2-alerts role
-                alerts_role = discord.utils.get(guild.roles, name="rm2-alerts")
-                if alerts_role:
+                # Get or create the rm2-alerts role
+                alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
+                if not alerts_role:
                     try:
-                        await user.add_roles(alerts_role)
-                        await user.send(f"You have been subscribed to rm2 alerts in {guild.name}!")
+                        alerts_role = await guild.create_role(
+                            name=ALERTS_ROLE_NAME,
+                            color=discord.Color.red(),
+                            reason="Auto-created for rm2 alerts system"
+                        )
+                        print(f"Created {ALERTS_ROLE_NAME} role in {guild.name} for user {user.name}")
                     except discord.Forbidden:
-                        print(f"Bot doesn't have permission to assign role in {guild.name}")
+                        await user.send(f"Sorry, I don't have permission to create the {ALERTS_ROLE_NAME} role in {guild.name}. Please ask an administrator to create it.")
+                        return
                     except Exception as e:
-                        print(f"Error assigning role in {guild.name}: {e}")
-                else:
-                    print(f"rm2-alerts role not found in {guild.name}")
+                        await user.send(f"Sorry, there was an error creating the role in {guild.name}. Please try again later.")
+                        print(f"Error creating role in {guild.name}: {e}")
+                        return
+                
+                # Ensure rm2-alerts channel exists
+                alerts_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
+                if not alerts_channel:
+                    try:
+                        # Create alerts channel with specific permissions
+                        alerts_overwrites = {
+                            guild.default_role: discord.PermissionOverwrite(
+                                read_messages=True,   # Everyone can read alerts
+                                send_messages=False   # Only bot can send alerts
+                            ),
+                            guild.me: discord.PermissionOverwrite(
+                                send_messages=True,   # Bot can send alerts
+                                read_messages=True,   # Bot can read messages
+                                manage_channels=True  # Bot can manage the channel
+                            )
+                        }
+                        
+                        alerts_channel = await guild.create_text_channel(
+                            name=ALERTS_CHANNEL_NAME,
+                            topic="Alerts for Wars/BD/BSIM/Uni/FV",
+                            reason="Auto-created for rm2 alerts",
+                            overwrites=alerts_overwrites
+                        )
+                        print(f"Created {ALERTS_CHANNEL_NAME} channel in {guild.name} for user {user.name}")
+                    except discord.Forbidden:
+                        await user.send(f"Sorry, I don't have permission to create the {ALERTS_CHANNEL_NAME} channel in {guild.name}. Please ask an administrator to create it.")
+                        return
+                    except Exception as e:
+                        await user.send(f"Sorry, there was an error creating the alerts channel in {guild.name}. Please try again later.")
+                        print(f"Error creating alerts channel in {guild.name}: {e}")
+                        return
+                
+                try:
+                    await user.add_roles(alerts_role)
+                    await user.send(f"You have been subscribed to rm2 alerts in {guild.name}!")
+                except discord.Forbidden:
+                    await user.send(f"Sorry, I don't have permission to assign the {ALERTS_ROLE_NAME} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
+                except Exception as e:
+                    await user.send(f"Sorry, there was an error assigning the role in {guild.name}. Please try again later.")
+                    print(f"Error assigning role in {guild.name}: {e}")
 
 @bot.event
 async def on_raw_reaction_remove(payload):
     # Check if the reaction is in a rm2-alerts-setup channel
     if payload.channel_id:
         channel = bot.get_channel(payload.channel_id)
-        if channel and channel.name == "rm2-alerts-setup":
+        if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
             # Check if it's the bell emoji
             if payload.emoji.name == "🔔":
                 guild = bot.get_guild(payload.guild_id)
                 user = guild.get_member(payload.user_id)
                 
                 # Get the rm2-alerts role
-                alerts_role = discord.utils.get(guild.roles, name="rm2-alerts")
+                alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
                 if alerts_role:
                     try:
                         await user.remove_roles(alerts_role)
                         await user.send(f"You have been unsubscribed from rm2 alerts in {guild.name}!")
                     except discord.Forbidden:
-                        print(f"Bot doesn't have permission to remove role in {guild.name}")
+                        await user.send(f"Sorry, I don't have permission to remove the {ALERTS_ROLE_NAME} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
                     except Exception as e:
+                        await user.send(f"Sorry, there was an error removing the role in {guild.name}. Please try again later.")
                         print(f"Error removing role in {guild.name}: {e}")
                 else:
-                    print(f"rm2-alerts role not found in {guild.name}")
+                    await user.send(f"The {ALERTS_ROLE_NAME} role doesn't exist in {guild.name}.")
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
-    if message.author.id == lanz_user_id and message.channel.id == lanz2_server_channel_id_general:
+    if message.author.id == LANZ_USER_ID and message.channel.id == LANZ2_SERVER_CHANNEL_ID_GENERAL:
         # Send alerts to "rm2-alerts" channel in all guilds where bot is installed
         for guild in bot.guilds:
-            alert_channel = discord.utils.get(guild.channels, name="rm2-alerts")
+            alert_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
             if alert_channel:
                 # Get the rm2-alerts role for this guild
-                alerts_role = discord.utils.get(guild.roles, name="rm2-alerts")
+                alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
                 role_mention = alerts_role.mention if alerts_role else "@rm2-alerts"
                 
                 if "food shop war is starting in 15 minutes" in message.content.lower():
