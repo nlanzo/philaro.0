@@ -19,19 +19,23 @@ intents.guilds = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-origin_server_id = LANZ2_SERVER_ID
+# change these to the rm2 ids in production
+rm2_discord_server_id = LANZ2_SERVER_ID
+rm2_general_chat_id = LANZ2_SERVER_CHANNEL_ID_GENERAL
+rm2_global_shout_user_id = LANZ_USER_ID
 
 
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} is here to defeat the Sun!")
     
-    # Set up infrastructure for all guilds
+    # Set up infrastructure for all guilds (not on rm2 server)
     for guild in bot.guilds:
-        if guild.id == origin_server_id:
+        if guild.id == rm2_discord_server_id:
             continue
         await setup_guild_infrastructure(guild)
 
+# add the role to the user when the reaction is added
 @bot.event
 async def on_raw_reaction_add(payload):
     # Check if the reaction is in a rm2-alerts-setup channel
@@ -61,11 +65,12 @@ async def on_raw_reaction_add(payload):
                     await user.send(f"Sorry, there was an error assigning the role in {guild.name}. Please try again later.")
                     print(f"Error assigning role in {guild.name}: {e}")
 
+# remove the role from the user when the reaction is removed
 @bot.event
 async def on_raw_reaction_remove(payload):
-    # Check if the reaction is in a rm2-alerts-setup channel
     if payload.channel_id:
         channel = bot.get_channel(payload.channel_id)
+        # Check if the reaction is in a rm2-alerts-setup channel
         if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
             # Check if it's the bell emoji
             if payload.emoji.name == "🔔":
@@ -86,12 +91,12 @@ async def on_raw_reaction_remove(payload):
                 else:
                     await user.send(f"The {ALERTS_ROLE_NAME} role doesn't exist in {guild.name}.")
 
+# send alerts to the "rm2-alerts" channel in all guilds where bot is installed
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
-    if message.author.id == LANZ_USER_ID and message.channel.id == LANZ2_SERVER_CHANNEL_ID_GENERAL:
-        # Send alerts to "rm2-alerts" channel in all guilds where bot is installed
+    if message.author.id == rm2_global_shout_user_id and message.channel.id == rm2_general_chat_id:
         for guild in bot.guilds:
             alert_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
             if alert_channel:
@@ -116,6 +121,9 @@ async def on_message(message):
 
                 if "battle simulation opens in 5 minutes!" in message.content.lower():
                     await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
+
+                if "Sky City is launching an attack on Freedom Village in 30 minutes!" in message.content.lower():
+                    await alert_channel.send(f"{role_mention} Sky City is launching an attack on Freedom Village in 30 minutes!")
             else:
                 print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
 

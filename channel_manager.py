@@ -1,6 +1,8 @@
 import discord
 from constants import *
 
+
+# create the setup channel in the guild if it doesn't exist
 async def ensure_setup_channel(guild):
     """Ensure the rm2-alerts-setup channel exists in the guild"""
     setup_channel = discord.utils.get(guild.channels, name=ALERTS_SETUP_CHANNEL_NAME)
@@ -37,6 +39,8 @@ async def ensure_setup_channel(guild):
             return None
     return setup_channel
 
+
+# create the alerts channel in the guild if it doesn't exist
 async def ensure_alerts_channel(guild):
     """Ensure the rm2-alerts channel exists in the guild"""
     alerts_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
@@ -71,6 +75,8 @@ async def ensure_alerts_channel(guild):
             return None
     return alerts_channel
 
+
+# create the alerts role in the guild if it doesn't exist
 async def ensure_alerts_role(guild):
     """Ensure the rm2-alerts role exists in the guild"""
     alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
@@ -91,6 +97,8 @@ async def ensure_alerts_role(guild):
             return None
     return alerts_role
 
+
+# create the setup message in the setup channel if it doesn't exist
 async def create_setup_message(setup_channel):
     """Create the role assignment message in the setup channel"""
     # Check if there's already a role assignment message
@@ -106,6 +114,8 @@ async def create_setup_message(setup_channel):
     await role_message.add_reaction("🔔")
     return role_message
 
+
+# set up all required channels and roles for a guild
 async def setup_guild_infrastructure(guild):
     """Set up all required channels and roles for a guild"""
     # Ensure setup channel exists
@@ -128,6 +138,7 @@ async def setup_guild_infrastructure(guild):
     
     return True
 
+# set up all required channels and roles for a user
 async def setup_guild_for_user(guild, user):
     """Set up guild infrastructure when a user tries to subscribe"""
     # Ensure alerts role exists
