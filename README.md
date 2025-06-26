@@ -1,5 +1,7 @@
 # Philaro.0 - Redmoon2 Discord Bot
 
+[Redmoon2](https://redmoon2.com)
+
 A Discord bot that automatically announces Redmoon2 events across multiple Discord servers. The bot monitors the main RM2 server for announcements and forwards them to all connected servers with proper role-based notifications.
 
 ## Features
