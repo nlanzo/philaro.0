@@ -26,9 +26,7 @@ rm2_global_shout_user_id = RM2_GLOBAL_SHOUT_USER_ID
 
 
 @bot.event
-async def on_ready():
-    print(f"{bot.user.name} is here to defeat the Sun!")
-    
+async def on_ready():  
     # Set up infrastructure for all guilds (not on rm2 server)
     for guild in bot.guilds:
         print(f"Setting up infrastructure for {guild.name}")
@@ -39,6 +37,7 @@ async def on_ready():
                 print(f"Channel: {channel.name}")
             continue
         await setup_guild_infrastructure(guild)
+    print(f"{bot.user.name} is here to defeat the Sun!")
 
 # add the role to the user when the reaction is added
 @bot.event
@@ -102,6 +101,8 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if message.author.id == rm2_global_shout_user_id and message.channel.id == rm2_general_chat_id:
+        # DEBUG
+        print(f"Message content from rm2 global shout: {message.content.lower()}")
         for guild in bot.guilds:
             if guild.id == rm2_discord_server_id:
                 continue
@@ -111,31 +112,31 @@ async def on_message(message):
                 alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
                 role_mention = alerts_role.mention if alerts_role else "@rm2-alerts"
                 
-                if "food shop war is starting in 15 minutes in street 2!" == message.content.lower():
+                if "**food shop war is starting in 15 minutes in street 2!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Food Shop War (street 2) starts in 15 minutes!")
 
-                if "food shop war is starting in 15 minutes in signus ax-1!" == message.content.lower():
+                if "**food shop war is starting in 15 minutes in signus ax-1!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Food Shop War (Signus AX-1) starts in 15 minutes!")
 
-                if "food shop war is starting in 15 minutes in downtown 4!" == message.content.lower():
+                if "**food shop war is starting in 15 minutes in downtown 4!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Food Shop War (Downtown 4) starts in 15 minutes!")
 
-                if "hq war starting in 5 minutes!" == message.content.lower():
+                if "**hq war starting in 5 minutes!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
 
-                if "sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!" == message.content.lower():
+                if "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Uni open for 5 minutes")
 
-                if "sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes (solo or as a group)!" == message.content.lower():
+                if "**sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes (solo or as a group)!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Uni Dungeon open for 5 minutes")
 
-                if "battle dimension starts in 30 minutes" == message.content.lower():
+                if "**battle dimension starts in 30 minutes**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
 
-                if "battle simulation opens in 5 minutes!" == message.content.lower():
+                if "**battle simulation opens in 5 minutes!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
 
-                if "sky city is launching an attack on freedom village in 30 minutes!" == message.content.lower():
+                if "**sky city is launching an attack on freedom village in 30 minutes!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
             else:
                 print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
