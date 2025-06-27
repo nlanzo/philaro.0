@@ -138,6 +138,9 @@ async def on_message(message):
 
                 if "**sky city is launching an attack on freedom village in 30 minutes!**" == message.content.lower():
                     await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
+
+                if "**monster invasion starts in 10 minutes!**" == message.content.lower():
+                    await alert_channel.send(f"{role_mention} Monster Invasion starts in 10 minutes!")
             else:
                 print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
 
