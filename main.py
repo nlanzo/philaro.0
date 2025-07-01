@@ -39,6 +39,30 @@ async def on_ready():
         await setup_guild_infrastructure(guild)
     print(f"{bot.user.name} is here to defeat the Sun!")
 
+
+
+# Map emojis to role names
+emoji_to_role = {
+    "🍔": FSWAR_ROLE_NAME,
+    "🏢": HQWAR_ROLE_NAME,
+    "🎓": UNI_ROLE_NAME,
+    "⚔️": BD_ROLE_NAME,
+    "🎮": BSIM_ROLE_NAME,
+    "🏘️": FV_ROLE_NAME,
+    "👹": MI_ROLE_NAME
+}
+
+emoji_to_readable_name = {
+    "🍔": "Food Shop War",
+    "🏢": "HQ War",
+    "🎓": "Uni / Uni Dungeon",
+    "⚔️": "Battle Dimension",
+    "🎮": "Battle Simulation",
+    "🏘️": "Freedom Village",
+    "👹": "Monster Invasion"
+}
+    
+
 # add the role to the user when the reaction is added
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -53,17 +77,6 @@ async def on_raw_reaction_add(payload):
             if user == bot.user:
                 return
             
-            # Map emojis to role names
-            emoji_to_role = {
-                "🍔": FSWAR_ROLE_NAME,
-                "🏢": HQWAR_ROLE_NAME,
-                "🎓": UNI_ROLE_NAME,
-                "⚔️": BD_ROLE_NAME,
-                "🎮": BSIM_ROLE_NAME,
-                "🏘️": FV_ROLE_NAME,
-                "👹": MI_ROLE_NAME
-            }
-            
             if payload.emoji.name in emoji_to_role:
                 role_name = emoji_to_role[payload.emoji.name]
                 role = discord.utils.get(guild.roles, name=role_name)
@@ -74,7 +87,7 @@ async def on_raw_reaction_add(payload):
                 
                 try:
                     await user.add_roles(role)
-                    await user.send(f"You have been subscribed to {role_name} alerts in {guild.name}!")
+                    await user.send(f"You have subscribed to {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
                 except discord.Forbidden:
                     await user.send(f"Sorry, I don't have permission to assign the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
                 except Exception as e:
@@ -91,17 +104,6 @@ async def on_raw_reaction_remove(payload):
             guild = bot.get_guild(payload.guild_id)
             user = guild.get_member(payload.user_id)
             
-            # Map emojis to role names
-            emoji_to_role = {
-                "🍔": FSWAR_ROLE_NAME,
-                "🏢": HQWAR_ROLE_NAME,
-                "🎓": UNI_ROLE_NAME,
-                "⚔️": BD_ROLE_NAME,
-                "🎮": BSIM_ROLE_NAME,
-                "🏘️": FV_ROLE_NAME,
-                "👹": MI_ROLE_NAME
-            }
-            
             if payload.emoji.name in emoji_to_role:
                 role_name = emoji_to_role[payload.emoji.name]
                 role = discord.utils.get(guild.roles, name=role_name)
@@ -109,7 +111,7 @@ async def on_raw_reaction_remove(payload):
                 if role:
                     try:
                         await user.remove_roles(role)
-                        await user.send(f"You have been unsubscribed from {role_name} alerts in {guild.name}!")
+                        await user.send(f"You have unsubscribed from {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
                     except discord.Forbidden:
                         await user.send(f"Sorry, I don't have permission to remove the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
                     except Exception as e:

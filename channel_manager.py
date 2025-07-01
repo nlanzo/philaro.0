@@ -25,7 +25,7 @@ async def ensure_setup_channel(guild):
             
             setup_channel = await guild.create_text_channel(
                 name=ALERTS_SETUP_CHANNEL_NAME,
-                topic="Click the bell 🔔 to subscribe to rm2 alerts on this server",
+                topic="React to the message to subscribe to rm2 alerts on this server",
                 reason="Auto-created for rm2 alerts setup",
                 overwrites=overwrites
             )
@@ -61,7 +61,7 @@ async def ensure_alerts_channel(guild):
             
             alerts_channel = await guild.create_text_channel(
                 name=ALERTS_CHANNEL_NAME,
-                topic="Alerts for Wars/BD/BSIM/Uni/FV",
+                topic="Alerts for Wars/BD/BSIM/Uni/FV/MI",
                 reason="Auto-created for rm2 alerts",
                 overwrites=alerts_overwrites
             )
@@ -151,14 +151,14 @@ async def create_setup_message(setup_channel):
     
     # No existing message found, create a new one
     role_message = await setup_channel.send(
-        "React to subscribe to different rm2 alerts:\n"
-        "🍔 - Food Shop War alerts\n"
-        "🏢 - HQ War alerts\n"
-        "🎓 - Uni alerts\n"
-        "⚔️ - Battle Dimension alerts\n"
-        "🎮 - Battle Simulation alerts\n"
-        "🏘️ - Freedom Village alerts\n"
-        "👹 - Monster Invasion alerts"
+        "React to subscribe/unsubscribe to different rm2 alerts:\n"
+        "🍔 - Food Shop War\n"
+        "🏢 - HQ War\n"
+        "🎓 - Uni / Uni Dungeon\n"
+        "⚔️ - Battle Dimension\n"
+        "🎮 - Battle Simulation\n"
+        "🏘️ - Freedom Village\n"
+        "👹 - Monster Invasion"
     )
     
     # Add all reactions
