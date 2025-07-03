@@ -139,7 +139,7 @@ async def create_setup_message(setup_channel):
     """Create the role assignment message in the setup channel"""
     # Check if there's already a role assignment message
     async for message in setup_channel.history(limit=50):
-        if message.author == setup_channel.guild.me and "React to subscribe to different rm2 alerts" in message.content:
+        if message.author == setup_channel.guild.me and "React to subscribe/unsubscribe to different rm2 alerts" in message.content:
             # Message already exists, add reactions if not present
             expected_reactions = ["🍔", "🏢", "🎓", "⚔️", "🎮", "🏘️", "👹"]
             current_reactions = [str(reaction.emoji) for reaction in message.reactions]
