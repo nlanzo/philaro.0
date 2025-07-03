@@ -4,7 +4,7 @@ import logging
 from dotenv import load_dotenv
 import os
 from constants import *
-from channel_manager import setup_guild_infrastructure, setup_guild_for_user
+from channel_manager import setup_guild_infrastructure
 
 
 load_dotenv()
@@ -38,6 +38,26 @@ async def on_ready():
             continue
         await setup_guild_infrastructure(guild)
     print(f"{bot.user.name} is here to defeat the Sun!")
+
+
+@bot.event
+async def on_guild_join(guild):
+    """Handle when the bot joins a new guild"""
+    print(f"Joined new guild: {guild.name} (ID: {guild.id})")
+    
+    # Skip setup for rm2 server
+    if guild.id == rm2_discord_server_id:
+        print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
+        return
+    
+    # Set up infrastructure for the new guild
+    print(f"Setting up infrastructure for new guild: {guild.name}")
+    success = await setup_guild_infrastructure(guild)
+    
+    if success:
+        print(f"Successfully set up infrastructure for {guild.name}")
+    else:
+        print(f"Failed to set up infrastructure for {guild.name}. The bot may need additional permissions.")
 
 
 
