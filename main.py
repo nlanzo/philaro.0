@@ -175,6 +175,12 @@ async def on_message(message):
                     role_mention = hqwar_role.mention if hqwar_role else f"@{HQWAR_ROLE_NAME}"
                     await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
 
+                # PVP tournament - use rm2-alerts-pvpt role
+                if "**pvp tournament starts in 30 minutes, please opt in in the special battle arena!**" == message.content.lower():
+                    pvpt_role = discord.utils.get(guild.roles, name=PVP_TOURNAMENT_ROLE_NAME)
+                    role_mention = pvpt_role.mention if pvpt_role else f"@{PVP_TOURNAMENT_ROLE_NAME}"
+                    await alert_channel.send(f"{role_mention} PvP Tournament starts in 30 minutes!  Opt in!")
+
                 # Uni events - use rm2-alerts-uni role
                 if "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**" == message.content.lower():
                     uni_role = discord.utils.get(guild.roles, name=UNI_ROLE_NAME)

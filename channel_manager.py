@@ -83,13 +83,14 @@ async def ensure_all_alert_roles(guild):
     
     # Define role configurations
     role_configs = [
-        (FSWAR_ROLE_NAME, discord.Color.orange(), "Food Shop War alerts"),
+        (FSWAR_ROLE_NAME, discord.Color.red(), "Food Shop War alerts"),
         (HQWAR_ROLE_NAME, discord.Color.red(), "HQ War alerts"),
+        (PVP_TOURNAMENT_ROLE_NAME, discord.Color.red(), "PvP Tournament alerts"),
         (UNI_ROLE_NAME, discord.Color.blue(), "Uni alerts"),
         (BD_ROLE_NAME, discord.Color.purple(), "Battle Dimension alerts"),
-        (BSIM_ROLE_NAME, discord.Color.green(), "Battle Simulation alerts"),
-        (FV_ROLE_NAME, discord.Color.dark_green(), "Freedom Village alerts"),
-        (MI_ROLE_NAME, discord.Color.dark_red(), "Monster Invasion alerts")
+        (BSIM_ROLE_NAME, discord.Color.purple(), "Battle Simulation alerts"),
+        (FV_ROLE_NAME, discord.Color.blue(), "Freedom Village alerts"),
+        (MI_ROLE_NAME, discord.Color.blue(), "Monster Invasion alerts")
     ]
     
     for role_name, color, reason in role_configs:
@@ -141,7 +142,7 @@ async def create_setup_message(setup_channel):
     async for message in setup_channel.history(limit=50):
         if message.author == setup_channel.guild.me and "React to subscribe/unsubscribe to different rm2 alerts" in message.content:
             # Message already exists, add reactions if not present
-            expected_reactions = ["🍔", "🏢", "🎓", "⚔️", "🎮", "🏘️", "👹"]
+            expected_reactions = ["🍔", "🏢", "💪", "🎓", "⚔️", "🎮", "🏘️", "👹"]
             current_reactions = [str(reaction.emoji) for reaction in message.reactions]
             
             for emoji in expected_reactions:
@@ -154,15 +155,16 @@ async def create_setup_message(setup_channel):
         "React to subscribe/unsubscribe to different rm2 alerts:\n"
         "🍔 - Food Shop War\n"
         "🏢 - HQ War\n"
+        "💪 - PvP Tournament\n"
         "🎓 - Uni / Uni Dungeon\n"
         "⚔️ - Battle Dimension\n"
         "🎮 - Battle Simulation\n"
         "🏘️ - Freedom Village\n"
-        "👹 - Monster Invasion"
+        "👹 - Monster Invasion\n"
     )
     
     # Add all reactions
-    reactions = ["🍔", "🏢", "🎓", "⚔️", "🎮", "🏘️", "👹"]
+    reactions = ["🍔", "🏢", "💪", "🎓", "⚔️", "🎮", "🏘️", "👹"]
     for emoji in reactions:
         await role_message.add_reaction(emoji)
     

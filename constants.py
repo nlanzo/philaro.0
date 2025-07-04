@@ -6,11 +6,13 @@ ALERTS_SETUP_CHANNEL_NAME = "rm2-alerts-setup"
 # specific event role names
 FSWAR_ROLE_NAME = "rm2-alerts-fswar"
 HQWAR_ROLE_NAME = "rm2-alerts-hqwar"
+PVP_TOURNAMENT_ROLE_NAME = "rm2-alerts-pvpt"
 UNI_ROLE_NAME = "rm2-alerts-uni"
 BD_ROLE_NAME = "rm2-alerts-bd"
 BSIM_ROLE_NAME = "rm2-alerts-bsim"
 FV_ROLE_NAME = "rm2-alerts-fv"
 MI_ROLE_NAME = "rm2-alerts-mi"
+
 
 # rm2 server variables
 RM2_SERVER_ID = 859685499441512478
