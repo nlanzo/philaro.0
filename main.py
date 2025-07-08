@@ -65,6 +65,7 @@ async def on_guild_join(guild):
 emoji_to_role = {
     "🍔": FSWAR_ROLE_NAME,
     "🏢": HQWAR_ROLE_NAME,
+    "💪": PVP_TOURNAMENT_ROLE_NAME,
     "🎓": UNI_ROLE_NAME,
     "⚔️": BD_ROLE_NAME,
     "🎮": BSIM_ROLE_NAME,
@@ -75,6 +76,7 @@ emoji_to_role = {
 emoji_to_readable_name = {
     "🍔": "Food Shop War",
     "🏢": "HQ War",
+    "💪": "PvP Tournament",
     "🎓": "Uni / Uni Dungeon",
     "⚔️": "Battle Dimension",
     "🎮": "Battle Simulation",
