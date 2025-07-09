@@ -13,6 +13,7 @@ A Discord bot that automatically announces Redmoon2 events across multiple Disco
 - **Event Types Supported**:
   - Food Shop Wars (Street 2, Signus AX-1, Downtown 4)
   - HQ Wars
+  - PVP Tournament
   - Uni Raids (Sky Skirmish, Sky Dungeon)
   - Battle Dimension
   - Battle Simulation
@@ -27,12 +28,12 @@ A Discord bot that automatically announces Redmoon2 events across multiple Disco
 2. The bot will automatically create:
    - `#rm2-alerts-setup` - Channel for users to subscribe to alerts
    - `#rm2-alerts` - Channel where alerts will be posted
-   - `rm2-alerts` role - Role for users who want to receive notifications
+   - Multiple roles - One for each category of alert
 
 ### For Users
 
-1. **Subscribe to alerts**: Go to the `#rm2-alerts-setup` channel and click the 🔔 reaction
-2. **Unsubscribe from alerts**: Remove the 🔔 reaction from the setup message
+1. **Subscribe to alerts**: Go to the `#rm2-alerts-setup` channel and click the appropriate reaction
+2. **Unsubscribe from alerts**: Remove the reaction from the setup message
 3. **Receive notifications**: You'll be pinged in `#rm2-alerts` when events are announced
 
 ## Bot Permissions Required
