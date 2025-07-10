@@ -24,7 +24,7 @@ A Discord bot that automatically announces Redmoon2 events across multiple Disco
 
 ### For Server Administrators
 
-1. **Invite the bot** to your Discord server with appropriate permissions
+1. [**Invite the bot**](https://discord.com/oauth2/authorize?client_id=1387174596947611800) to your Discord server with appropriate permissions
 2. The bot will automatically create:
    - `#rm2-alerts-setup` - Channel for users to subscribe to alerts
    - `#rm2-alerts` - Channel where alerts will be posted
