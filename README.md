@@ -29,6 +29,7 @@ A Discord bot that automatically announces Redmoon2 events across multiple Disco
    - `#rm2-alerts-setup` - Channel for users to subscribe to alerts
    - `#rm2-alerts` - Channel where alerts will be posted
    - Multiple roles - One for each category of alert
+3. **IMPORTANT** - Make sure the bot's role is above the alerts roles or it will not be able to assign the roles!
 
 ### For Users
 

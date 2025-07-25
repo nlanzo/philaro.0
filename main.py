@@ -109,41 +109,26 @@ async def on_raw_reaction_add(payload):
                     role_name = emoji_to_role[payload.emoji.name]
                     role = discord.utils.get(guild.roles, name=role_name)
                     
-                    # Debug logging
-                    print(f"DEBUG: User {user.name} reacted with {payload.emoji.name}")
-                    print(f"DEBUG: Looking for role '{role_name}' in guild '{guild.name}'")
-                    print(f"DEBUG: Bot's highest role: {guild.me.top_role.name}")
-                    print(f"DEBUG: Bot's permissions: {guild.me.guild_permissions}")
-                    
                     if not role:
-                        print(f"DEBUG: Role '{role_name}' not found in guild")
                         await user.send(f"Sorry, the {role_name} role doesn't exist in {guild.name}. Please ask an administrator to create it.")
                         return
                     
-                    print(f"DEBUG: Found role '{role.name}' with position {role.position}")
-                    print(f"DEBUG: Bot's top role position: {guild.me.top_role.position}")
-                    
                     # Check if bot has Manage Roles permission
                     if not guild.me.guild_permissions.manage_roles:
-                        print(f"DEBUG: Bot doesn't have Manage Roles permission")
                         await user.send(f"Sorry, I don't have the 'Manage Roles' permission in {guild.name}. Please ask an administrator to give me this permission.")
                         return
                     
                     # Check if bot can assign this specific role (role hierarchy)
                     if role.position >= guild.me.top_role.position:
-                        print(f"DEBUG: Role position {role.position} >= bot's top role position {guild.me.top_role.position}")
                         await user.send(f"Sorry, I can't assign the {role_name} role in {guild.name} because it's higher than my role. Please ask an administrator to move my role higher in the role list.")
                         return
                     
                     try:
                         await user.add_roles(role)
                         await user.send(f"You have subscribed to {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
-                        print(f"DEBUG: Successfully assigned role '{role.name}' to user '{user.name}'")
                     except discord.Forbidden as e:
-                        print(f"DEBUG: Forbidden error details: {e}")
                         await user.send(f"Sorry, I don't have permission to assign the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
                     except Exception as e:
-                        print(f"DEBUG: Other error: {e}")
                         await user.send(f"Sorry, there was an error assigning the role in {guild.name}. Please try again later.")
                         print(f"Error assigning role in {guild.name}: {e}")
     except Exception as e:
@@ -184,8 +169,6 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if message.author.id == rm2_global_shout_user_id and message.channel.id == rm2_general_chat_id:
-        # DEBUG
-        print(f"Message content from rm2 global shout: {message.content.lower()}")
         for guild in bot.guilds:
             if guild.id == rm2_discord_server_id:
                 continue
