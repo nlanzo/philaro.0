@@ -80,20 +80,8 @@ async def ensure_alerts_channel(guild):
 async def ensure_all_alert_roles(guild):
     """Ensure all rm2-alerts roles exist in the guild"""
     roles = {}
-    
-    # Define role configurations
-    role_configs = [
-        (FSWAR_ROLE_NAME, discord.Color.red(), "Food Shop War alerts"),
-        (HQWAR_ROLE_NAME, discord.Color.red(), "HQ War alerts"),
-        (PVP_TOURNAMENT_ROLE_NAME, discord.Color.red(), "PvP Tournament alerts"),
-        (UNI_ROLE_NAME, discord.Color.blue(), "Uni alerts"),
-        (BD_ROLE_NAME, discord.Color.purple(), "Battle Dimension alerts"),
-        (BSIM_ROLE_NAME, discord.Color.purple(), "Battle Simulation alerts"),
-        (FV_ROLE_NAME, discord.Color.blue(), "Freedom Village alerts"),
-        (MI_ROLE_NAME, discord.Color.blue(), "Monster Invasion alerts")
-    ]
-    
-    for role_name, color, reason in role_configs:
+        
+    for role_name, reason, color, _ in ROLE_CONFIGS:
         role = discord.utils.get(guild.roles, name=role_name)
         if not role:
             try:
@@ -105,70 +93,37 @@ async def ensure_all_alert_roles(guild):
                 print(f"Created {role_name} role in {guild.name}")
             except discord.Forbidden:
                 print(f"Bot doesn't have permission to create roles in {guild.name}")
-                return None
+                return {}
             except Exception as e:
                 print(f"Error creating role {role_name} in {guild.name}: {e}")
-                return None
+                return {}
         roles[role_name] = role
     
     return roles
 
-# create the alerts role in the guild if it doesn't exist (keeping for backward compatibility)
-async def ensure_alerts_role(guild):
-    """Ensure the rm2-alerts role exists in the guild"""
-    alerts_role = discord.utils.get(guild.roles, name=ALERTS_ROLE_NAME)
-    if not alerts_role:
-        try:
-            alerts_role = await guild.create_role(
-                name=ALERTS_ROLE_NAME,
-                color=discord.Color.red(),
-                reason="Auto-created for rm2 alerts system"
-            )
-            print(f"Created {ALERTS_ROLE_NAME} role in {guild.name}")
-            return alerts_role
-        except discord.Forbidden:
-            print(f"Bot doesn't have permission to create roles in {guild.name}")
-            return None
-        except Exception as e:
-            print(f"Error creating role in {guild.name}: {e}")
-            return None
-    return alerts_role
 
 
-# create the setup message in the setup channel if it doesn't exist
+EXPECTED_REACTIONS = [emoji for _, _, _, emoji in ROLE_CONFIGS]
+
 async def create_setup_message(setup_channel):
-    """Create the role assignment message in the setup channel"""
-    # Check if there's already a role assignment message
+    setup_message_content = "React to subscribe/unsubscribe to different rm2 alerts:\n" + "\n".join([f"{emoji} - {reason}" for _, reason, _, emoji in ROLE_CONFIGS])
     async for message in setup_channel.history(limit=50):
         if message.author == setup_channel.guild.me and "React to subscribe/unsubscribe to different rm2 alerts" in message.content:
-            # Message already exists, add reactions if not present
-            expected_reactions = ["🍔", "🏢", "💪", "🎓", "⚔️", "🎮", "🏘️", "👹"]
+            # Update content if needed
+            if message.content != setup_message_content:
+                message = await message.edit(content=setup_message_content)
+            # Add missing reactions
             current_reactions = [str(reaction.emoji) for reaction in message.reactions]
-            
-            for emoji in expected_reactions:
+            for emoji in EXPECTED_REACTIONS:
                 if emoji not in current_reactions:
                     await message.add_reaction(emoji)
-            return message
-    
-    # No existing message found, create a new one
-    role_message = await setup_channel.send(
-        "React to subscribe/unsubscribe to different rm2 alerts:\n"
-        "🍔 - Food Shop War\n"
-        "🏢 - HQ War\n"
-        "💪 - PvP Tournament\n"
-        "🎓 - Uni / Uni Dungeon\n"
-        "⚔️ - Battle Dimension\n"
-        "🎮 - Battle Simulation\n"
-        "🏘️ - Freedom Village\n"
-        "👹 - Monster Invasion\n"
-    )
-    
-    # Add all reactions
-    reactions = ["🍔", "🏢", "💪", "🎓", "⚔️", "🎮", "🏘️", "👹"]
-    for emoji in reactions:
-        await role_message.add_reaction(emoji)
-    
-    return role_message
+            return message  # Return the found/updated message
+
+    # If no setup message found, create a new one
+    message = await setup_channel.send(setup_message_content)
+    for emoji in EXPECTED_REACTIONS:
+        await message.add_reaction(emoji)
+    return message
 
 
 # set up all required channels and roles for a guild
@@ -193,20 +148,3 @@ async def setup_guild_infrastructure(guild):
     await create_setup_message(setup_channel)
     
     return True
-
-# set up all required channels and roles for a user
-async def setup_guild_for_user(guild, user):
-    """Set up guild infrastructure when a user tries to subscribe"""
-    # Ensure alerts role exists
-    alerts_role = await ensure_alerts_role(guild)
-    if not alerts_role:
-        await user.send(f"Sorry, I don't have permission to create the {ALERTS_ROLE_NAME} role in {guild.name}. Please ask an administrator to create it.")
-        return None
-    
-    # Ensure alerts channel exists
-    alerts_channel = await ensure_alerts_channel(guild)
-    if not alerts_channel:
-        await user.send(f"Sorry, I don't have permission to create the {ALERTS_CHANNEL_NAME} channel in {guild.name}. Please ask an administrator to create it.")
-        return None
-    
-    return alerts_role

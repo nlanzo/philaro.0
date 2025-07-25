@@ -9,6 +9,7 @@ from channel_manager import setup_guild_infrastructure
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
+ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 
@@ -19,7 +20,7 @@ intents.guilds = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# change these to the rm2 ids in production
+
 rm2_discord_server_id = RM2_SERVER_ID
 rm2_general_chat_id = RM2_SERVER_CHANNEL_ID_GLOBAL
 rm2_global_shout_user_id = RM2_GLOBAL_SHOUT_USER_ID
@@ -27,120 +28,155 @@ rm2_global_shout_user_id = RM2_GLOBAL_SHOUT_USER_ID
 
 @bot.event
 async def on_ready():  
-    # Set up infrastructure for all guilds (not on rm2 server)
-    for guild in bot.guilds:
+    print(f"ENVIRONMENT: {ENVIRONMENT}")
+        # only setup on my test server in development
+    if ENVIRONMENT == "dev":
+        print("DEV: getting guild")
+        guild = bot.get_guild(DEV_SERVER_ID)
+        print(f"DEV: guild: {guild.name}")
         print(f"Setting up infrastructure for {guild.name}")
-        if guild.id == rm2_discord_server_id:
-            print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
-            print("Channels I see in rm2 discord server:")
-            for channel in guild.channels:
-                print(f"Channel: {channel.name}")
-            continue
-        await setup_guild_infrastructure(guild)
+        success = await setup_guild_infrastructure(guild)
+        if success:
+            print(f"DEV: Successfully set up infrastructure for {guild.name}")
+        else:
+            print(f"DEV: Failed to set up infrastructure for {guild.name}")
+    # setup on all guilds in production
+    elif ENVIRONMENT == "prod":
+        for guild in bot.guilds:
+            if guild.id == rm2_discord_server_id:
+                print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
+                continue
+            print(f"Setting up infrastructure for {guild.name}")
+            success = await setup_guild_infrastructure(guild)
+            if success:
+                print(f"Successfully set up infrastructure for {guild.name}")
+            else:
+                print(f"Failed to set up infrastructure for {guild.name}")
     print(f"{bot.user.name} is here to defeat the Sun!")
 
 
 @bot.event
 async def on_guild_join(guild):
     """Handle when the bot joins a new guild"""
-    print(f"Joined new guild: {guild.name} (ID: {guild.id})")
-    
-    # Skip setup for rm2 server
-    if guild.id == rm2_discord_server_id:
-        print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
-        return
-    
-    # Set up infrastructure for the new guild
-    print(f"Setting up infrastructure for new guild: {guild.name}")
-    success = await setup_guild_infrastructure(guild)
-    
-    if success:
-        print(f"Successfully set up infrastructure for {guild.name}")
-    else:
-        print(f"Failed to set up infrastructure for {guild.name}. The bot may need additional permissions.")
+    try:
+        print(f"Joined new guild: {guild.name} (ID: {guild.id})")
+        
+        # Skip setup for rm2 server
+        if guild.id == rm2_discord_server_id:
+            print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
+            return
+        
+        # Set up infrastructure for the new guild
+        print(f"Setting up infrastructure for new guild: {guild.name}")
+        success = await setup_guild_infrastructure(guild)
+        
+        if success:
+            print(f"Successfully set up infrastructure for {guild.name}")
+        else:
+            print(f"Failed to set up infrastructure for {guild.name}. The bot may need additional permissions.")
+    except Exception as e:
+        print(f"Error setting up infrastructure for new guild {guild.name}: {e}")
 
 
 
 # Map emojis to role names
-emoji_to_role = {
-    "🍔": FSWAR_ROLE_NAME,
-    "🏢": HQWAR_ROLE_NAME,
-    "💪": PVP_TOURNAMENT_ROLE_NAME,
-    "🎓": UNI_ROLE_NAME,
-    "⚔️": BD_ROLE_NAME,
-    "🎮": BSIM_ROLE_NAME,
-    "🏘️": FV_ROLE_NAME,
-    "👹": MI_ROLE_NAME
-}
+emoji_to_role = {emoji: role_name for role_name, _, _, emoji in ROLE_CONFIGS}
+# map emojis to readable names
+emoji_to_readable_name = {emoji: reason for _, reason, _, emoji in ROLE_CONFIGS}
 
-emoji_to_readable_name = {
-    "🍔": "Food Shop War",
-    "🏢": "HQ War",
-    "💪": "PvP Tournament",
-    "🎓": "Uni / Uni Dungeon",
-    "⚔️": "Battle Dimension",
-    "🎮": "Battle Simulation",
-    "🏘️": "Freedom Village",
-    "👹": "Monster Invasion"
-}
+def get_role_mention(guild, role_name):
+    """Helper function to get role mention or fallback to @role_name"""
+    role = discord.utils.get(guild.roles, name=role_name)
+    return role.mention if role else f"@{role_name}"
     
 
 # add the role to the user when the reaction is added
 @bot.event
 async def on_raw_reaction_add(payload):
-    # Check if the reaction is in a rm2-alerts-setup channel
-    if payload.channel_id:
-        channel = bot.get_channel(payload.channel_id)
-        if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
-            guild = bot.get_guild(payload.guild_id)
-            user = guild.get_member(payload.user_id)
-            
-            # Don't assign role to the bot itself
-            if user == bot.user:
-                return
-            
-            if payload.emoji.name in emoji_to_role:
-                role_name = emoji_to_role[payload.emoji.name]
-                role = discord.utils.get(guild.roles, name=role_name)
+    try:
+        # Check if the reaction is in a rm2-alerts-setup channel
+        if payload.channel_id:
+            channel = bot.get_channel(payload.channel_id)
+            if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
+                guild = bot.get_guild(payload.guild_id)
+                user = guild.get_member(payload.user_id)
                 
-                if not role:
-                    await user.send(f"Sorry, the {role_name} role doesn't exist in {guild.name}. Please ask an administrator to create it.")
+                # Don't assign role to the bot itself
+                if user == bot.user:
                     return
                 
-                try:
-                    await user.add_roles(role)
-                    await user.send(f"You have subscribed to {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
-                except discord.Forbidden:
-                    await user.send(f"Sorry, I don't have permission to assign the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
-                except Exception as e:
-                    await user.send(f"Sorry, there was an error assigning the role in {guild.name}. Please try again later.")
-                    print(f"Error assigning role in {guild.name}: {e}")
+                if payload.emoji.name in emoji_to_role:
+                    role_name = emoji_to_role[payload.emoji.name]
+                    role = discord.utils.get(guild.roles, name=role_name)
+                    
+                    # Debug logging
+                    print(f"DEBUG: User {user.name} reacted with {payload.emoji.name}")
+                    print(f"DEBUG: Looking for role '{role_name}' in guild '{guild.name}'")
+                    print(f"DEBUG: Bot's highest role: {guild.me.top_role.name}")
+                    print(f"DEBUG: Bot's permissions: {guild.me.guild_permissions}")
+                    
+                    if not role:
+                        print(f"DEBUG: Role '{role_name}' not found in guild")
+                        await user.send(f"Sorry, the {role_name} role doesn't exist in {guild.name}. Please ask an administrator to create it.")
+                        return
+                    
+                    print(f"DEBUG: Found role '{role.name}' with position {role.position}")
+                    print(f"DEBUG: Bot's top role position: {guild.me.top_role.position}")
+                    
+                    # Check if bot has Manage Roles permission
+                    if not guild.me.guild_permissions.manage_roles:
+                        print(f"DEBUG: Bot doesn't have Manage Roles permission")
+                        await user.send(f"Sorry, I don't have the 'Manage Roles' permission in {guild.name}. Please ask an administrator to give me this permission.")
+                        return
+                    
+                    # Check if bot can assign this specific role (role hierarchy)
+                    if role.position >= guild.me.top_role.position:
+                        print(f"DEBUG: Role position {role.position} >= bot's top role position {guild.me.top_role.position}")
+                        await user.send(f"Sorry, I can't assign the {role_name} role in {guild.name} because it's higher than my role. Please ask an administrator to move my role higher in the role list.")
+                        return
+                    
+                    try:
+                        await user.add_roles(role)
+                        await user.send(f"You have subscribed to {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
+                        print(f"DEBUG: Successfully assigned role '{role.name}' to user '{user.name}'")
+                    except discord.Forbidden as e:
+                        print(f"DEBUG: Forbidden error details: {e}")
+                        await user.send(f"Sorry, I don't have permission to assign the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
+                    except Exception as e:
+                        print(f"DEBUG: Other error: {e}")
+                        await user.send(f"Sorry, there was an error assigning the role in {guild.name}. Please try again later.")
+                        print(f"Error assigning role in {guild.name}: {e}")
+    except Exception as e:
+        print(f"Error in on_raw_reaction_add: {e}")
 
 # remove the role from the user when the reaction is removed
 @bot.event
 async def on_raw_reaction_remove(payload):
-    if payload.channel_id:
-        channel = bot.get_channel(payload.channel_id)
-        # Check if the reaction is in a rm2-alerts-setup channel
-        if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
-            guild = bot.get_guild(payload.guild_id)
-            user = guild.get_member(payload.user_id)
-            
-            if payload.emoji.name in emoji_to_role:
-                role_name = emoji_to_role[payload.emoji.name]
-                role = discord.utils.get(guild.roles, name=role_name)
+    try:
+        if payload.channel_id:
+            channel = bot.get_channel(payload.channel_id)
+            # Check if the reaction is in a rm2-alerts-setup channel
+            if channel and channel.name == ALERTS_SETUP_CHANNEL_NAME:
+                guild = bot.get_guild(payload.guild_id)
+                user = guild.get_member(payload.user_id)
                 
-                if role:
-                    try:
-                        await user.remove_roles(role)
-                        await user.send(f"You have unsubscribed from {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
-                    except discord.Forbidden:
-                        await user.send(f"Sorry, I don't have permission to remove the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
-                    except Exception as e:
-                        await user.send(f"Sorry, there was an error removing the role in {guild.name}. Please try again later.")
-                        print(f"Error removing role in {guild.name}: {e}")
-                else:
-                    await user.send(f"The {role_name} role doesn't exist in {guild.name}.")
+                if payload.emoji.name in emoji_to_role:
+                    role_name = emoji_to_role[payload.emoji.name]
+                    role = discord.utils.get(guild.roles, name=role_name)
+                    
+                    if role:
+                        try:
+                            await user.remove_roles(role)
+                            await user.send(f"You have unsubscribed from {emoji_to_readable_name[payload.emoji.name]} alerts in {guild.name}!")
+                        except discord.Forbidden:
+                            await user.send(f"Sorry, I don't have permission to remove the {role_name} role in {guild.name}. Please ask an administrator to give me the 'Manage Roles' permission.")
+                        except Exception as e:
+                            await user.send(f"Sorry, there was an error removing the role in {guild.name}. Please try again later.")
+                            print(f"Error removing role in {guild.name}: {e}")
+                    else:
+                        await user.send(f"The {role_name} role doesn't exist in {guild.name}.")
+    except Exception as e:
+        print(f"Error in on_raw_reaction_remove: {e}")
 
 # send alerts to the "rm2-alerts" channel in all guilds where bot is installed
 @bot.event
@@ -155,68 +191,87 @@ async def on_message(message):
                 continue
             alert_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
             if alert_channel:
-                # Food Shop War events - use rm2-alerts-fswar role
-                if "**food shop war is starting in 15 minutes in street 2!**" == message.content.lower():
-                    fswar_role = discord.utils.get(guild.roles, name=FSWAR_ROLE_NAME)
-                    role_mention = fswar_role.mention if fswar_role else f"@{FSWAR_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Food Shop War (street 2) starts in 15 minutes!")
+                try:
+                    # Food Shop War events - use rm2-alerts-fswar role
+                    if "**food shop war is starting in 15 minutes in street 2!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Food Shop War (street 2) starts in 15 minutes!")
 
-                if "**food shop war is starting in 15 minutes in signus ax-1!**" == message.content.lower():
-                    fswar_role = discord.utils.get(guild.roles, name=FSWAR_ROLE_NAME)
-                    role_mention = fswar_role.mention if fswar_role else f"@{FSWAR_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Food Shop War (Signus AX-1) starts in 15 minutes!")
+                    if "**food shop war is starting in 15 minutes in signus ax-1!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Food Shop War (Signus AX-1) starts in 15 minutes!")
 
-                if "**food shop war is starting in 15 minutes in downtown 4!**" == message.content.lower():
-                    fswar_role = discord.utils.get(guild.roles, name=FSWAR_ROLE_NAME)
-                    role_mention = fswar_role.mention if fswar_role else f"@{FSWAR_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Food Shop War (Downtown 4) starts in 15 minutes!")
-                
-                # HQ War events - use rm2-alerts-hqwar role
-                if "**hq war starting in 5 minutes!**" == message.content.lower():
-                    hqwar_role = discord.utils.get(guild.roles, name=HQWAR_ROLE_NAME)
-                    role_mention = hqwar_role.mention if hqwar_role else f"@{HQWAR_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
+                    if "**food shop war is starting in 15 minutes in downtown 4!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Food Shop War (Downtown 4) starts in 15 minutes!")
+                    
+                    # HQ War events - use rm2-alerts-hqwar role
+                    if "**hq war starting in 5 minutes!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, HQWAR_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
 
-                # PVP tournament - use rm2-alerts-pvpt role
-                if "**pvp tournament starts in 30 minutes, please opt in in the special battle arena!**" == message.content.lower():
-                    pvpt_role = discord.utils.get(guild.roles, name=PVP_TOURNAMENT_ROLE_NAME)
-                    role_mention = pvpt_role.mention if pvpt_role else f"@{PVP_TOURNAMENT_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} PvP Tournament starts in 30 minutes!  Opt in!")
+                    # PVP tournament - use rm2-alerts-pvpt role
+                    if "**pvp tournament starts in 30 minutes, please opt in in the special battle arena!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, PVP_TOURNAMENT_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} PvP Tournament starts in 30 minutes!  Opt in!")
 
-                # Uni events - use rm2-alerts-uni role
-                if "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**" == message.content.lower():
-                    uni_role = discord.utils.get(guild.roles, name=UNI_ROLE_NAME)
-                    role_mention = uni_role.mention if uni_role else f"@{UNI_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Uni open for 5 minutes")
+                    # Uni events - use rm2-alerts-uni role
+                    if "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, UNI_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Uni open for 5 minutes")
 
-                if "**sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes (solo or as a group)!**" == message.content.lower():
-                    uni_role = discord.utils.get(guild.roles, name=UNI_ROLE_NAME)
-                    role_mention = uni_role.mention if uni_role else f"@{UNI_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Uni Dungeon open for 5 minutes")
+                    if "**sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes (solo or as a group)!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, UNI_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Uni Dungeon open for 5 minutes")
 
-                # Battle Dimension events - use rm2-alerts-bd role
-                if "**battle dimension starts in 30 minutes**" == message.content.lower():
-                    bd_role = discord.utils.get(guild.roles, name=BD_ROLE_NAME)
-                    role_mention = bd_role.mention if bd_role else f"@{BD_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
+                    # Battle Dimension events - use rm2-alerts-bd role
+                    if "**battle dimension starts in 30 minutes**" == message.content.lower():
+                        role_mention = get_role_mention(guild, BD_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
 
-                # Battle Simulation events - use rm2-alerts-bsim role
-                if "**battle simulation opens in 5 minutes!**" == message.content.lower():
-                    bsim_role = discord.utils.get(guild.roles, name=BSIM_ROLE_NAME)
-                    role_mention = bsim_role.mention if bsim_role else f"@{BSIM_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
+                    # Battle Simulation events - use rm2-alerts-bsim role
+                    if "**battle simulation opens in 5 minutes!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, BSIM_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
 
-                # Freedom Village events - use rm2-alerts-fv role
-                if "**sky city is launching an attack on freedom village in 30 minutes!**" == message.content.lower():
-                    fv_role = discord.utils.get(guild.roles, name=FV_ROLE_NAME)
-                    role_mention = fv_role.mention if fv_role else f"@{FV_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
+                    # Freedom Village events - use rm2-alerts-fv role
+                    if "**sky city is launching an attack on freedom village in 30 minutes!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, FV_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
 
-                # Monster Invasion events - use rm2-alerts-mi role
-                if "**monster invasion starts in 10 minutes!**" == message.content.lower():
-                    mi_role = discord.utils.get(guild.roles, name=MI_ROLE_NAME)
-                    role_mention = mi_role.mention if mi_role else f"@{MI_ROLE_NAME}"
-                    await alert_channel.send(f"{role_mention} Monster Invasion starts in 10 minutes!")
+                    # Monster Invasion events - use rm2-alerts-mi role
+                    if "**monster invasion starts in 10 minutes!**" == message.content.lower():
+                        role_mention = get_role_mention(guild, MI_ROLE_NAME)
+                        await alert_channel.send(f"{role_mention} Monster Invasion starts in 10 minutes!")
+
+                    if message.content.lower().startswith("**open pvp battle starts in 30 minutes in"):
+                        try:
+                            # More robust map parsing
+                            words = message.content.split()
+                            # Find the index of the second"in" and extract everything after it until the last "!"
+                            in_index = -1
+                            in_count = 0
+                            for i, word in enumerate(words):
+                                if word.lower() == "in":
+                                    in_index = i
+                                    in_count += 1
+                                    if in_count == 2:
+                                        break
+                            
+                            if in_index != -1 and in_index + 1 < len(words):
+                                map_words = words[in_index + 1:-1]  # Exclude the last "!"
+                                map = " ".join(map_words)
+                                role_mention = get_role_mention(guild, PVP_BATTLE_ROLE_NAME)
+                                await alert_channel.send(f"{role_mention} Open PvP Battle starts in 30 minutes in {map}!")
+                            else:
+                                print(f"Could not parse map from message: {message.content}")
+                        except Exception as e:
+                            print(f"Error parsing open PvP battle map: {e}")
+                        
+                except discord.Forbidden:
+                    print(f"Bot doesn't have permission to send messages in {guild.name}'s alerts channel")
+                except Exception as e:
+                    print(f"Error sending alert to {guild.name}: {e}")
             else:
                 print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
 
