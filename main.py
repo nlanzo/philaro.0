@@ -231,7 +231,7 @@ async def on_message(message):
                         try:
                             # More robust map parsing
                             words = message.content.split()
-                            # Find the index of the second"in" and extract everything after it until the last "!"
+                            # Find the index of the second "in" and extract everything after it until the trailing "!**"
                             in_index = -1
                             in_count = 0
                             for i, word in enumerate(words):
@@ -242,8 +242,8 @@ async def on_message(message):
                                         break
                             
                             if in_index != -1 and in_index + 1 < len(words):
-                                map_words = words[in_index + 1:-1]  # Exclude the last "!"
-                                map = " ".join(map_words)
+                                map_words = words[in_index + 1:]
+                                map = " ".join(map_words).replace("!**", "")  # Exclude the trailing "!**"
                                 role_mention = get_role_mention(guild, PVP_BATTLE_ROLE_NAME)
                                 await alert_channel.send(f"{role_mention} Open PvP Battle starts in 30 minutes in {map}!")
                             else:
