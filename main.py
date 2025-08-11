@@ -223,9 +223,9 @@ async def on_message(message):
                         await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
 
                     # Monster Invasion events - use rm2-alerts-mi role
-                    if "**monster invasion starts in 10 minutes!**" == message.content.lower():
+                    if "**monster invasion starts in 30 minutes!**" == message.content.lower():
                         role_mention = get_role_mention(guild, MI_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Monster Invasion starts in 10 minutes!")
+                        await alert_channel.send(f"{role_mention} Monster Invasion starts in 30 minutes!")
 
                     if message.content.lower().startswith("**open pvp battle starts in 30 minutes in"):
                         try:
