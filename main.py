@@ -250,7 +250,27 @@ async def on_message(message):
                                 print(f"Could not parse map from message: {message.content}")
                         except Exception as e:
                             print(f"Error parsing open PvP battle map: {e}")
-                        
+
+                    # hallowvern nightmarish portal
+                    if message.content.lower().startswith("**hallowvern left behind a nightmarish portal in"):
+                        try:
+                            words = message.content.split()
+                            # Find the index of "in" and extract everything after it until the trailing "!**"
+                            in_index = -1
+                            for i, word in enumerate(words):
+                                if word.lower() == "in":
+                                    in_index = i
+                                    break
+                            if in_index != -1 and in_index + 1 < len(words):
+                                map_words = words[in_index + 1:]
+                                map = " ".join(map_words).replace("!**", "")  # Exclude the trailing "!**"
+                                role_mention = get_role_mention(guild, HALLOWVERN_ROLE_NAME)
+                                await alert_channel.send(f"{role_mention} Hallowvern left behind a nightmarish portal in {map}!")
+                            else:
+                                print(f"Could not parse map from message: {message.content}")
+                        except Exception as e:
+                            print(f"Error parsing halloween map: {e}")
+
                 except discord.Forbidden:
                     print(f"Bot doesn't have permission to send messages in {guild.name}'s alerts channel")
                 except Exception as e:
