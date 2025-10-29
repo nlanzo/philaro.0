@@ -11,6 +11,7 @@ from admin_commands import handle_dm_commands
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
+admin_id = os.getenv("ADMIN_USER_ID")
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
@@ -173,7 +174,7 @@ async def on_message(message):
     
     # Handle DM commands
     if isinstance(message.channel, discord.DMChannel):
-        await handle_dm_commands(message, bot)
+        await handle_dm_commands(message, bot, admin_id)
         return
     
     if message.author.id == rm2_global_shout_user_id and message.channel.id == rm2_general_chat_id:
