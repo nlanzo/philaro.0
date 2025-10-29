@@ -11,7 +11,7 @@ from admin_commands import handle_dm_commands
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
-admin_id = os.getenv("ADMIN_USER_ID")
+admin_id = int(os.getenv("ADMIN_USER_ID"))
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
