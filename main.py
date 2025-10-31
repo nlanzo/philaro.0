@@ -7,6 +7,7 @@ from constants import *
 from channel_manager import setup_guild_infrastructure
 from special_events import handle_friendly_hallowvern
 from admin_commands import handle_dm_commands
+from event_handlers import handle_guild_join
 
 
 load_dotenv()
@@ -60,25 +61,7 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    """Handle when the bot joins a new guild"""
-    try:
-        print(f"Joined new guild: {guild.name} (ID: {guild.id})")
-        
-        # Skip setup for rm2 server
-        if guild.id == rm2_discord_server_id:
-            print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
-            return
-        
-        # Set up infrastructure for the new guild
-        print(f"Setting up infrastructure for new guild: {guild.name}")
-        success = await setup_guild_infrastructure(guild)
-        
-        if success:
-            print(f"Successfully set up infrastructure for {guild.name}")
-        else:
-            print(f"Failed to set up infrastructure for {guild.name}. The bot may need additional permissions.")
-    except Exception as e:
-        print(f"Error setting up infrastructure for new guild {guild.name}: {e}")
+    await handle_guild_join(guild)
 
 
 
