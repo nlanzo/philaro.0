@@ -4,10 +4,9 @@ import logging
 from dotenv import load_dotenv
 import os
 from constants import *
-from channel_manager import setup_guild_infrastructure
 from special_events import handle_friendly_hallowvern
 from admin_commands import handle_dm_commands
-from event_handlers import handle_guild_join
+from event_handlers import handle_guild_join, handle_ready
 
 
 load_dotenv()
@@ -32,31 +31,7 @@ rm2_global_shout_user_id = RM2_GLOBAL_SHOUT_USER_ID
 
 @bot.event
 async def on_ready():  
-    print(f"ENVIRONMENT: {ENVIRONMENT}")
-        # only setup on my test server in development
-    if ENVIRONMENT == "dev":
-        print("DEV: getting guild")
-        guild = bot.get_guild(DEV_SERVER_ID)
-        print(f"DEV: guild: {guild.name}")
-        print(f"Setting up infrastructure for {guild.name}")
-        success = await setup_guild_infrastructure(guild)
-        if success:
-            print(f"DEV: Successfully set up infrastructure for {guild.name}")
-        else:
-            print(f"DEV: Failed to set up infrastructure for {guild.name}")
-    # setup on all guilds in production
-    elif ENVIRONMENT == "prod":
-        for guild in bot.guilds:
-            if guild.id == rm2_discord_server_id:
-                print(f"Skipping setup infrastructure for {guild.name} because it's the rm2 server")
-                continue
-            print(f"Setting up infrastructure for {guild.name}")
-            success = await setup_guild_infrastructure(guild)
-            if success:
-                print(f"Successfully set up infrastructure for {guild.name}")
-            else:
-                print(f"Failed to set up infrastructure for {guild.name}")
-    print(f"{bot.user.name} is here to defeat the Sun!")
+    await handle_ready(bot, ENVIRONMENT)
 
 
 @bot.event
