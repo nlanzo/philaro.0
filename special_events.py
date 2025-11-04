@@ -1,9 +1,10 @@
 """Handle special game events and send alerts to the appropriate channels."""
 
 from constants import HALLOWVERN_ROLE_NAME
+from utils import get_role_mention
 
 
-async def handle_friendly_hallowvern(message, guild, alert_channel, get_role_mention):
+async def handle_friendly_hallowvern(message, guild, alert_channel):
     """
     Handle the "friendly hallowvern appeared" special event.
     
@@ -11,7 +12,6 @@ async def handle_friendly_hallowvern(message, guild, alert_channel, get_role_men
         message: The Discord message object
         guild: The Discord guild object
         alert_channel: The channel to send the alert to
-        get_role_mention: Function to get role mentions
     """
     if message.content.lower().startswith("**friendly hallowvern appeared in"):
         try:

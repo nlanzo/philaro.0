@@ -7,6 +7,7 @@ from constants import *
 from special_events import handle_friendly_hallowvern
 from admin_commands import handle_dm_commands
 from event_handlers import handle_guild_join, handle_ready
+from utils import get_role_mention
 
 
 load_dotenv()
@@ -44,12 +45,6 @@ async def on_guild_join(guild):
 emoji_to_role = {emoji: role_name for role_name, _, _, emoji in ROLE_CONFIGS}
 # map emojis to readable names
 emoji_to_readable_name = {emoji: reason for _, reason, _, emoji in ROLE_CONFIGS}
-
-def get_role_mention(guild, role_name):
-    """Helper function to get role mention or fallback to @role_name"""
-    role = discord.utils.get(guild.roles, name=role_name)
-    return role.mention if role else f"@{role_name}"
-    
 
 # add the role to the user when the reaction is added
 @bot.event
@@ -219,7 +214,7 @@ async def on_message(message):
                             print(f"Error parsing open PvP battle map: {e}")
 
                     # friendly hallowvern appeared
-                    await handle_friendly_hallowvern(message, guild, alert_channel, get_role_mention)
+                    await handle_friendly_hallowvern(message, guild, alert_channel)
 
                 except discord.Forbidden:
                     print(f"Bot doesn't have permission to send messages in {guild.name}'s alerts channel")
