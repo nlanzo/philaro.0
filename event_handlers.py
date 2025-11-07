@@ -16,7 +16,8 @@ from constants import (
     MI_ROLE_NAME,
     PVP_BATTLE_ROLE_NAME,
     RM2_SERVER_CHANNEL_ID_GLOBAL,
-    RM2_GLOBAL_SHOUT_USER_ID
+    RM2_GLOBAL_SHOUT_USER_ID,
+    OUTLAW_ROLE_NAME
 )
 from channel_manager import setup_guild_infrastructure
 from special_events import handle_friendly_hallowvern
@@ -253,8 +254,26 @@ async def handle_message(bot, message, admin_id):
                         except Exception as e:
                             print(f"Error parsing open PvP battle map: {e}")
 
+
+                    # player became an outlaw
+                    if message.content.lower().startswith("**player "):
+                        try:
+                            words = message.content.split()
+                            if words[2:6] == ["became", "an", "outlaw", "at"]:
+                                player_name = words[2]
+                                map = " ".join(words[6:]).replace("!**", "")
+                                role_mention = get_role_mention(guild, OUTLAW_ROLE_NAME)
+                                await alert_channel.send(f"{role_mention} {player_name} became an outlaw at {map}!")
+                            else:
+                                print(f"Could not parse player name or map from message: {message.content}")
+                        except Exception as e:
+                            print(f"Error parsing outlaw message: {e}")
+
                     # friendly hallowvern appeared
                     await handle_friendly_hallowvern(message, guild, alert_channel)
+
+
+
 
                 except discord.Forbidden:
                     print(f"Bot doesn't have permission to send messages in {guild.name}'s alerts channel")

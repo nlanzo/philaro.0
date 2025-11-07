@@ -15,6 +15,7 @@ BSIM_ROLE_NAME = "rm2-alerts-bsim"
 FV_ROLE_NAME = "rm2-alerts-fv"
 MI_ROLE_NAME = "rm2-alerts-mi"
 PVP_BATTLE_ROLE_NAME = "rm2-alerts-pvpbattle"
+OUTLAW_ROLE_NAME = "rm2-alerts-outlaw"
 
 # halloween events
 HALLOWVERN_ROLE_NAME = "rm2-alerts-hallowvern"
@@ -32,6 +33,7 @@ ROLE_CONFIGS = [
     (FV_ROLE_NAME, "Freedom Village", discord.Color.blue(), "🏘️"),
     (MI_ROLE_NAME, "Monster Invasion", discord.Color.blue(), "👹"),
     (PVP_BATTLE_ROLE_NAME, "Open PvP Battle", discord.Color.purple(), "🔥"),
+    (OUTLAW_ROLE_NAME, "Player became an outlaw", discord.Color.red(), "👮"),
     # halloween events
     (HALLOWVERN_ROLE_NAME, "Hallowvern Portal", discord.Color.orange(), "🎃"),
 ]
