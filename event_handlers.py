@@ -259,8 +259,8 @@ async def handle_message(bot, message, admin_id):
                     if message.content.lower().startswith("**player "):
                         try:
                             words = message.content.split()
-                            if words[2:6] == ["became", "an", "outlaw", "at"]:
-                                player_name = words[2]
+                            if len(words) >= 6 and words[2:6] == ["became", "an", "outlaw", "at"]:
+                                player_name = words[1]
                                 map = " ".join(words[6:]).replace("!**", "")
                                 role_mention = get_role_mention(guild, OUTLAW_ROLE_NAME)
                                 await alert_channel.send(f"{role_mention} {player_name} became an outlaw at {map}!")
