@@ -199,7 +199,7 @@ async def handle_message(bot, message, admin_id):
                     # PVP tournament - use rm2-alerts-pvpt role
                     if "**pvp tournament starts in 20 minutes, please opt in in the special battle arena!**" == message.content.lower():
                         role_mention = get_role_mention(guild, PVP_TOURNAMENT_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} PvP Tournament starts in 30 minutes!  Opt in!")
+                        await alert_channel.send(f"{role_mention} PvP Tournament starts in 20 minutes!  Opt in!")
 
                     # Uni events - use rm2-alerts-uni role
                     if "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**" == message.content.lower():
@@ -232,7 +232,6 @@ async def handle_message(bot, message, admin_id):
 
                     if message.content.lower().startswith("**open pvp battle starts in 30 minutes in"):
                         try:
-                            # More robust map parsing
                             words = message.content.split()
                             # Find the index of the second "in" and extract everything after it until the trailing "!**"
                             in_index = -1
