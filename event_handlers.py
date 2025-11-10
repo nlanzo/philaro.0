@@ -161,6 +161,23 @@ async def handle_raw_reaction_remove(bot, payload):
         print(f"Error in handle_raw_reaction_remove: {e}")
 
 
+async def handle_foodshop_war(message, guild, alert_channel):
+    """Send Food Shop War alerts to the provided channel when applicable."""
+    content = message.content.lower()
+    announcements = {
+        "**food shop war is starting in 15 minutes in street 2!**": "Food Shop War (street 2) starts in 15 minutes!",
+        "**food shop war is starting in 15 minutes in signus ax-1!**": "Food Shop War (Signus AX-1) starts in 15 minutes!",
+        "**food shop war is starting in 15 minutes in downtown 4!**": "Food Shop War (Downtown 4) starts in 15 minutes!",
+    }
+
+    announcement = announcements.get(content)
+    if not announcement:
+        return
+
+    role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} {announcement}")
+
+
 async def handle_message(bot, message, admin_id):
     """Handle incoming messages and send alerts to rm2-alerts channels"""
     if message.author == bot.user:
@@ -178,18 +195,7 @@ async def handle_message(bot, message, admin_id):
             alert_channel = discord.utils.get(guild.channels, name=ALERTS_CHANNEL_NAME)
             if alert_channel:
                 try:
-                    # Food Shop War events - use rm2-alerts-fswar role
-                    if "**food shop war is starting in 15 minutes in street 2!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Food Shop War (street 2) starts in 15 minutes!")
-
-                    if "**food shop war is starting in 15 minutes in signus ax-1!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Food Shop War (Signus AX-1) starts in 15 minutes!")
-
-                    if "**food shop war is starting in 15 minutes in downtown 4!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, FSWAR_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Food Shop War (Downtown 4) starts in 15 minutes!")
+                    await handle_foodshop_war(message, guild, alert_channel)
                     
                     # HQ War events - use rm2-alerts-hqwar role
                     if "**hq war starting in 5 minutes!**" == message.content.lower():
