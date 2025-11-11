@@ -284,6 +284,24 @@ async def handle_open_pvp_battle(message, guild, alert_channel):
         print(f"Error parsing open PvP battle map: {e}")
 
 
+async def handle_outlaw(message, guild, alert_channel):
+    """Send alerts for outlaw notifications when applicable."""
+    if not message.content.lower().startswith("**player "):
+        return
+
+    try:
+        words = message.content.split()
+        if len(words) >= 6 and words[2:6] == ["became", "an", "outlaw", "at"]:
+            player_name = words[1]
+            map = " ".join(words[6:]).replace("!**", "")
+            role_mention = get_role_mention(guild, OUTLAW_ROLE_NAME)
+            await alert_channel.send(f"{role_mention} {player_name} became an outlaw at {map}!")
+        else:
+            print(f"Could not parse player name or map from message: {message.content}")
+    except Exception as e:
+        print(f"Error parsing outlaw message: {e}")
+
+
 async def handle_message(bot, message, admin_id):
     """Handle incoming messages and send alerts to rm2-alerts channels"""
     if message.author == bot.user:
@@ -310,20 +328,7 @@ async def handle_message(bot, message, admin_id):
                     await handle_freedom_village(message, guild, alert_channel)
                     await handle_monster_invasion(message, guild, alert_channel)
                     await handle_open_pvp_battle(message, guild, alert_channel)
-
-                    # player became an outlaw
-                    if message.content.lower().startswith("**player "):
-                        try:
-                            words = message.content.split()
-                            if len(words) >= 6 and words[2:6] == ["became", "an", "outlaw", "at"]:
-                                player_name = words[1]
-                                map = " ".join(words[6:]).replace("!**", "")
-                                role_mention = get_role_mention(guild, OUTLAW_ROLE_NAME)
-                                await alert_channel.send(f"{role_mention} {player_name} became an outlaw at {map}!")
-                            else:
-                                print(f"Could not parse player name or map from message: {message.content}")
-                        except Exception as e:
-                            print(f"Error parsing outlaw message: {e}")
+                    await handle_outlaw(message, guild, alert_channel)
 
                     # friendly hallowvern appeared
                     await handle_friendly_hallowvern(message, guild, alert_channel)
