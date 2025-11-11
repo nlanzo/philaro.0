@@ -235,6 +235,27 @@ async def handle_battle_simulation(message, guild, alert_channel):
     await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
 
 
+async def handle_freedom_village(message, guild, alert_channel):
+    """Send Freedom Village alerts when applicable."""
+    if (
+        message.content.lower()
+        != "**sky city is launching an attack on freedom village in 30 minutes!**"
+    ):
+        return
+
+    role_mention = get_role_mention(guild, FV_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
+
+
+async def handle_monster_invasion(message, guild, alert_channel):
+    """Send Monster Invasion alerts when applicable."""
+    if message.content.lower() != "**monster invasion starts in 30 minutes!**":
+        return
+
+    role_mention = get_role_mention(guild, MI_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Monster Invasion starts in 30 minutes!")
+
+
 async def handle_message(bot, message, admin_id):
     """Handle incoming messages and send alerts to rm2-alerts channels"""
     if message.author == bot.user:
@@ -258,16 +279,8 @@ async def handle_message(bot, message, admin_id):
                     await handle_uni_events(message, guild, alert_channel)
                     await handle_battle_dimension(message, guild, alert_channel)
                     await handle_battle_simulation(message, guild, alert_channel)
-
-                    # Freedom Village events - use rm2-alerts-fv role
-                    if "**sky city is launching an attack on freedom village in 30 minutes!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, FV_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
-
-                    # Monster Invasion events - use rm2-alerts-mi role
-                    if "**monster invasion starts in 30 minutes!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, MI_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Monster Invasion starts in 30 minutes!")
+                    await handle_freedom_village(message, guild, alert_channel)
+                    await handle_monster_invasion(message, guild, alert_channel)
 
                     if message.content.lower().startswith("**open pvp battle starts in 30 minutes in"):
                         try:
