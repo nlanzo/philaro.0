@@ -226,6 +226,15 @@ async def handle_battle_dimension(message, guild, alert_channel):
     await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
 
 
+async def handle_battle_simulation(message, guild, alert_channel):
+    """Send Battle Simulation alerts when applicable."""
+    if message.content.lower() != "**battle simulation opens in 5 minutes!**":
+        return
+
+    role_mention = get_role_mention(guild, BSIM_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
+
+
 async def handle_message(bot, message, admin_id):
     """Handle incoming messages and send alerts to rm2-alerts channels"""
     if message.author == bot.user:
@@ -248,11 +257,7 @@ async def handle_message(bot, message, admin_id):
                     await handle_pvp_tournament(message, guild, alert_channel)
                     await handle_uni_events(message, guild, alert_channel)
                     await handle_battle_dimension(message, guild, alert_channel)
-
-                    # Battle Simulation events - use rm2-alerts-bsim role
-                    if "**battle simulation opens in 5 minutes!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, BSIM_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
+                    await handle_battle_simulation(message, guild, alert_channel)
 
                     # Freedom Village events - use rm2-alerts-fv role
                     if "**sky city is launching an attack on freedom village in 30 minutes!**" == message.content.lower():
