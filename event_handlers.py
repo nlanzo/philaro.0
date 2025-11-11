@@ -256,6 +256,34 @@ async def handle_monster_invasion(message, guild, alert_channel):
     await alert_channel.send(f"{role_mention} Monster Invasion starts in 30 minutes!")
 
 
+async def handle_open_pvp_battle(message, guild, alert_channel):
+    """Send Open PvP Battle alerts, including the map, when applicable."""
+    if not message.content.lower().startswith("**open pvp battle starts in 30 minutes in"):
+        return
+
+    try:
+        words = message.content.split()
+        # Find the index of the second "in" and extract everything after it until the trailing "!**"
+        in_index = -1
+        in_count = 0
+        for i, word in enumerate(words):
+            if word.lower() == "in":
+                in_index = i
+                in_count += 1
+                if in_count == 2:
+                    break
+
+        if in_index != -1 and in_index + 1 < len(words):
+            map_words = words[in_index + 1:]
+            map = " ".join(map_words).replace("!**", "")  # Exclude the trailing "!**"
+            role_mention = get_role_mention(guild, PVP_BATTLE_ROLE_NAME)
+            await alert_channel.send(f"{role_mention} Open PvP Battle starts in 30 minutes in {map}!")
+        else:
+            print(f"Could not parse map from message: {message.content}")
+    except Exception as e:
+        print(f"Error parsing open PvP battle map: {e}")
+
+
 async def handle_message(bot, message, admin_id):
     """Handle incoming messages and send alerts to rm2-alerts channels"""
     if message.author == bot.user:
@@ -281,30 +309,7 @@ async def handle_message(bot, message, admin_id):
                     await handle_battle_simulation(message, guild, alert_channel)
                     await handle_freedom_village(message, guild, alert_channel)
                     await handle_monster_invasion(message, guild, alert_channel)
-
-                    if message.content.lower().startswith("**open pvp battle starts in 30 minutes in"):
-                        try:
-                            words = message.content.split()
-                            # Find the index of the second "in" and extract everything after it until the trailing "!**"
-                            in_index = -1
-                            in_count = 0
-                            for i, word in enumerate(words):
-                                if word.lower() == "in":
-                                    in_index = i
-                                    in_count += 1
-                                    if in_count == 2:
-                                        break
-                            
-                            if in_index != -1 and in_index + 1 < len(words):
-                                map_words = words[in_index + 1:]
-                                map = " ".join(map_words).replace("!**", "")  # Exclude the trailing "!**"
-                                role_mention = get_role_mention(guild, PVP_BATTLE_ROLE_NAME)
-                                await alert_channel.send(f"{role_mention} Open PvP Battle starts in 30 minutes in {map}!")
-                            else:
-                                print(f"Could not parse map from message: {message.content}")
-                        except Exception as e:
-                            print(f"Error parsing open PvP battle map: {e}")
-
+                    await handle_open_pvp_battle(message, guild, alert_channel)
 
                     # player became an outlaw
                     if message.content.lower().startswith("**player "):
