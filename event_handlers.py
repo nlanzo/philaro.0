@@ -178,6 +178,54 @@ async def handle_foodshop_war(message, guild, alert_channel):
     await alert_channel.send(f"{role_mention} {announcement}")
 
 
+async def handle_hq_war(message, guild, alert_channel):
+    """Send HQ War alerts when applicable."""
+    if message.content.lower() != "**hq war starting in 5 minutes!**":
+        return
+
+    role_mention = get_role_mention(guild, HQWAR_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
+
+
+async def handle_pvp_tournament(message, guild, alert_channel):
+    """Send PvP Tournament alerts when applicable."""
+    if (
+        message.content.lower()
+        != "**pvp tournament starts in 20 minutes, please opt in in the special battle arena!**"
+    ):
+        return
+
+    role_mention = get_role_mention(guild, PVP_TOURNAMENT_ROLE_NAME)
+    await alert_channel.send(
+        f"{role_mention} PvP Tournament starts in 20 minutes!  Opt in!"
+    )
+
+
+async def handle_uni_events(message, guild, alert_channel):
+    """Send Uni event alerts when applicable."""
+    content = message.content.lower()
+    announcements = {
+        "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**": "Uni open for 5 minutes",
+        "**sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes (solo or as a group)!**": "Uni Dungeon open for 5 minutes",
+    }
+
+    announcement = announcements.get(content)
+    if not announcement:
+        return
+
+    role_mention = get_role_mention(guild, UNI_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} {announcement}")
+
+
+async def handle_battle_dimension(message, guild, alert_channel):
+    """Send Battle Dimension alerts when applicable."""
+    if message.content.lower() != "**battle dimension starts in 30 minutes**":
+        return
+
+    role_mention = get_role_mention(guild, BD_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
+
+
 async def handle_message(bot, message, admin_id):
     """Handle incoming messages and send alerts to rm2-alerts channels"""
     if message.author == bot.user:
@@ -196,30 +244,10 @@ async def handle_message(bot, message, admin_id):
             if alert_channel:
                 try:
                     await handle_foodshop_war(message, guild, alert_channel)
-                    
-                    # HQ War events - use rm2-alerts-hqwar role
-                    if "**hq war starting in 5 minutes!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, HQWAR_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} HQ War starts in 5 minutes!")
-
-                    # PVP tournament - use rm2-alerts-pvpt role
-                    if "**pvp tournament starts in 20 minutes, please opt in in the special battle arena!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, PVP_TOURNAMENT_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} PvP Tournament starts in 20 minutes!  Opt in!")
-
-                    # Uni events - use rm2-alerts-uni role
-                    if "**sky skirmish complete, join the uni raid within 5 minutes (solo or as a group)!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, UNI_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Uni open for 5 minutes")
-
-                    if "**sky dungeon skirmish complete, join the uni sky dungeon raid within 5 minutes (solo or as a group)!**" == message.content.lower():
-                        role_mention = get_role_mention(guild, UNI_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Uni Dungeon open for 5 minutes")
-
-                    # Battle Dimension events - use rm2-alerts-bd role
-                    if "**battle dimension starts in 30 minutes**" == message.content.lower():
-                        role_mention = get_role_mention(guild, BD_ROLE_NAME)
-                        await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
+                    await handle_hq_war(message, guild, alert_channel)
+                    await handle_pvp_tournament(message, guild, alert_channel)
+                    await handle_uni_events(message, guild, alert_channel)
+                    await handle_battle_dimension(message, guild, alert_channel)
 
                     # Battle Simulation events - use rm2-alerts-bsim role
                     if "**battle simulation opens in 5 minutes!**" == message.content.lower():
