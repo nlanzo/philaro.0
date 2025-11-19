@@ -28,7 +28,7 @@ ROLE_CONFIGS = [
     (HQWAR_ROLE_NAME, "HQ War", discord.Color.red(), "🏢"),
     (PVP_TOURNAMENT_ROLE_NAME, "PvP Tournament", discord.Color.red(), "💪"),
     (UNI_ROLE_NAME, "Uni", discord.Color.blue(), "🎓"),
-    (BD_ROLE_NAME, "Battle Dimension", discord.Color.purple(), "⚔️"),
+    (BD_ROLE_NAME, "Battle Dimension / Battle Match", discord.Color.purple(), "⚔️"),
     (BSIM_ROLE_NAME, "Battle Simulation", discord.Color.purple(), "🎮"),
     (FV_ROLE_NAME, "Freedom Village", discord.Color.blue(), "🏘️"),
     (MI_ROLE_NAME, "Monster Invasion", discord.Color.blue(), "👹"),

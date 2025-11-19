@@ -235,6 +235,15 @@ async def handle_battle_simulation(message, guild, alert_channel):
     await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
 
 
+async def handle_battle_match(message, guild, alert_channel):
+    """Send Battle Match alerts when applicable."""
+    if message.content.lower() != "**battle match starts in 30 minutes!**":
+        return
+
+    role_mention = get_role_mention(guild, BD_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Battle Match starts in 30 minutes!")
+
+
 async def handle_freedom_village(message, guild, alert_channel):
     """Send Freedom Village alerts when applicable."""
     if (
@@ -324,6 +333,7 @@ async def handle_message(bot, message, admin_id):
                     await handle_pvp_tournament(message, guild, alert_channel)
                     await handle_uni_events(message, guild, alert_channel)
                     await handle_battle_dimension(message, guild, alert_channel)
+                    await handle_battle_match(message, guild, alert_channel)
                     await handle_battle_simulation(message, guild, alert_channel)
                     await handle_freedom_village(message, guild, alert_channel)
                     await handle_monster_invasion(message, guild, alert_channel)
