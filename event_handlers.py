@@ -219,7 +219,7 @@ async def handle_uni_events(message, guild, alert_channel):
 
 async def handle_battle_dimension(message, guild, alert_channel):
     """Send Battle Dimension alerts when applicable."""
-    if message.content.lower() != "**battle dimension starts in 30 minutes**":
+    if message.content.lower() != "**battle dimension starts in 30 minutes!**":
         return
 
     role_mention = get_role_mention(guild, BD_ROLE_NAME)

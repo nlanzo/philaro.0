@@ -215,7 +215,7 @@ class TestHandleBattleDimension:
 
     @pytest.mark.asyncio
     async def test_handles_battle_dimension_announcement(self, mock_guild, mock_alert_channel, mock_message, mock_role):
-        mock_message.content = "**battle dimension starts in 30 minutes**"
+        mock_message.content = "**battle dimension starts in 30 minutes!**"
         mock_role.name = BD_ROLE_NAME
         mock_guild.roles = [mock_role]
         
