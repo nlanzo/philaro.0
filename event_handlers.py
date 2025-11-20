@@ -225,6 +225,13 @@ async def handle_battle_dimension(message, guild, alert_channel):
     role_mention = get_role_mention(guild, BD_ROLE_NAME)
     await alert_channel.send(f"{role_mention} Battle Dimension opens in 30 minutes")
 
+async def handle_battle_match(message, guild, alert_channel):
+    """Send Battle Match alerts when applicable."""
+    if message.content.lower() != "**battle match opens in 30 minutes!**":
+        return
+
+    role_mention = get_role_mention(guild, BD_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Battle Match opens in 30 minutes!")
 
 async def handle_battle_simulation(message, guild, alert_channel):
     """Send Battle Simulation alerts when applicable."""
@@ -233,16 +240,6 @@ async def handle_battle_simulation(message, guild, alert_channel):
 
     role_mention = get_role_mention(guild, BSIM_ROLE_NAME)
     await alert_channel.send(f"{role_mention} Battle Simulation opens in 5 minutes!")
-
-
-async def handle_battle_match(message, guild, alert_channel):
-    """Send Battle Match alerts when applicable."""
-    if message.content.lower() != "**battle match starts in 30 minutes!**":
-        return
-
-    role_mention = get_role_mention(guild, BD_ROLE_NAME)
-    await alert_channel.send(f"{role_mention} Battle Match starts in 30 minutes!")
-
 
 async def handle_freedom_village(message, guild, alert_channel):
     """Send Freedom Village alerts when applicable."""
