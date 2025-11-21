@@ -103,6 +103,8 @@ async def ensure_all_alert_roles(guild):
 
 
 
+
+
 EXPECTED_REACTIONS = [emoji for _, _, _, emoji in ROLE_CONFIGS]
 
 async def create_setup_message(setup_channel):
@@ -117,6 +119,10 @@ async def create_setup_message(setup_channel):
             for emoji in EXPECTED_REACTIONS:
                 if emoji not in current_reactions:
                     await message.add_reaction(emoji)
+            for reaction in message.reactions:
+                if str(reaction.emoji) not in EXPECTED_REACTIONS:
+                    # Remove the reaction from the message for all users who reacted
+                    await reaction.clear()
             return message  # Return the found/updated message
 
     # If no setup message found, create a new one

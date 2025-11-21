@@ -30,14 +30,13 @@ ROLE_CONFIGS = [
     (FSWAR_ROLE_NAME, "Food Shop War", discord.Color.red(), "🍔"),
     (HQWAR_ROLE_NAME, "HQ War", discord.Color.red(), "🏢"),
     (PVP_TOURNAMENT_ROLE_NAME, "PvP Tournament", discord.Color.red(), "💪"),
-    (UNI_ROLE_NAME, "Uni", discord.Color.blue(), "🎓"),
+    (OUTLAW_ROLE_NAME, "Player became an outlaw", discord.Color.red(), "👮"),
+    (UNI_ROLE_NAME, "Uni / Uni Dungeon", discord.Color.blue(), "🎓"),
     (BD_ROLE_NAME, "Battle Dimension / Battle Match", discord.Color.purple(), "⚔️"),
     (BSIM_ROLE_NAME, "Battle Simulation", discord.Color.purple(), "🎮"),
     (FV_ROLE_NAME, "Freedom Village", discord.Color.blue(), "🏘️"),
     (MI_ROLE_NAME, "Monster Invasion", discord.Color.blue(), "👹"),
     (PVP_BATTLE_ROLE_NAME, "Open PvP Battle", discord.Color.purple(), "🔥"),
-    (OUTLAW_ROLE_NAME, "Player became an outlaw", discord.Color.red(), "👮"),
-    # halloween events
     (SEASONAL_EVENT_ROLE_NAME, "Seasonal Event", discord.Color.orange(), "🎉"),
 ]
 
