@@ -17,9 +17,12 @@ MI_ROLE_NAME = "rm2-alerts-mi"
 PVP_BATTLE_ROLE_NAME = "rm2-alerts-pvpbattle"
 OUTLAW_ROLE_NAME = "rm2-alerts-outlaw"
 
-# halloween events
-HALLOWVERN_ROLE_NAME = "rm2-alerts-hallowvern"
-BATS_ROLE_NAME = "rm2-alerts-bats"
+# seasonal events
+SEASONAL_EVENT_ROLE_NAME = "rm2-alerts-seasonal-event"
+HALLOWEEN = False
+THANKSGIVING = True
+CHRISTMAS = False
+EASTER = False
 
 
 # role configs (ROLE_NAME, REASON, COLOR, EMOJI)
@@ -35,7 +38,7 @@ ROLE_CONFIGS = [
     (PVP_BATTLE_ROLE_NAME, "Open PvP Battle", discord.Color.purple(), "🔥"),
     (OUTLAW_ROLE_NAME, "Player became an outlaw", discord.Color.red(), "👮"),
     # halloween events
-    (HALLOWVERN_ROLE_NAME, "Hallowvern Portal", discord.Color.orange(), "🎃"),
+    (SEASONAL_EVENT_ROLE_NAME, "Seasonal Event", discord.Color.orange(), "🎉"),
 ]
 
 

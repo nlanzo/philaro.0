@@ -20,7 +20,7 @@ from constants import (
     OUTLAW_ROLE_NAME
 )
 from channel_manager import setup_guild_infrastructure
-from special_events import handle_friendly_hallowvern
+from special_events import handle_seasonal_event
 from admin_commands import handle_dm_commands
 from utils import get_role_mention
 
@@ -337,8 +337,7 @@ async def handle_message(bot, message, admin_id):
                     await handle_open_pvp_battle(message, guild, alert_channel)
                     await handle_outlaw(message, guild, alert_channel)
 
-                    # friendly hallowvern appeared
-                    await handle_friendly_hallowvern(message, guild, alert_channel)
+                    await handle_seasonal_event(message, guild, alert_channel)
 
 
 
@@ -351,3 +350,6 @@ async def handle_message(bot, message, admin_id):
                 print(f"Could not find 'rm2-alerts' channel in guild: {guild.name}")
 
     await bot.process_commands(message)
+
+
+
