@@ -47,12 +47,30 @@ async def handle_feast(message, guild, alert_channel):
     role_mention = get_role_mention(guild, SEASONAL_EVENT_ROLE_NAME)
     await alert_channel.send(f"{role_mention} A Thanksgiving Feast has been started!")
 
+
+async def handle_santa(message, guild, alert_channel):
+    """
+    Handle the "big santa spawned" special event.
+    
+    Args:
+        message: The Discord message object
+        guild: The Discord guild object
+        alert_channel: The channel to send the alert to
+    """
+    if not message.content.lower().startswith("**big santa spawned in street 1"):
+        return
+    role_mention = get_role_mention(guild, SEASONAL_EVENT_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Big Santa spawned in Street 1!")
+
+
 async def handle_halloween(message, guild, alert_channel):
     await handle_friendly_hallowvern(message, guild, alert_channel)
 
 async def handle_thanksgiving(message, guild, alert_channel):
     await handle_feast(message, guild, alert_channel)
 
+async def handle_christmas(message, guild, alert_channel):
+    await handle_santa(message, guild, alert_channel)
 
 async def handle_seasonal_event(message, guild, alert_channel):
     """
@@ -67,3 +85,5 @@ async def handle_seasonal_event(message, guild, alert_channel):
         await handle_halloween(message, guild, alert_channel)
     elif THANKSGIVING:
         await handle_thanksgiving(message, guild, alert_channel)
+    elif CHRISTMAS:
+        await handle_christmas(message, guild, alert_channel)

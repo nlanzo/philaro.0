@@ -20,8 +20,8 @@ OUTLAW_ROLE_NAME = "rm2-alerts-outlaw"
 # seasonal events
 SEASONAL_EVENT_ROLE_NAME = "rm2-alerts-seasonal-event"
 HALLOWEEN = False
-THANKSGIVING = True
-CHRISTMAS = False
+THANKSGIVING = False
+CHRISTMAS = True
 EASTER = False
 
 
