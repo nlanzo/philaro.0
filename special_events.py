@@ -57,7 +57,7 @@ async def handle_santa(message, guild, alert_channel):
         guild: The Discord guild object
         alert_channel: The channel to send the alert to
     """
-    if not message.content.lower().startswith("**big santa spawned in street 1"):
+    if not message.content.lower().startswith("**a big santa spawned in street 1"):
         return
     role_mention = get_role_mention(guild, SEASONAL_EVENT_ROLE_NAME)
     await alert_channel.send(f"{role_mention} Big Santa spawned in Street 1!")
