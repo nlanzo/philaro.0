@@ -1,7 +1,8 @@
 """Handle special game events and send alerts to the appropriate channels."""
 
+import datetime
 from constants import SEASONAL_EVENT_ROLE_NAME, HALLOWEEN, THANKSGIVING, CHRISTMAS, EASTER
-from utils import get_role_mention
+from utils import get_next_event_time, get_role_mention
 
 
 async def handle_friendly_hallowvern(message, guild, alert_channel):
@@ -59,8 +60,11 @@ async def handle_santa(message, guild, alert_channel):
     """
     if not message.content.lower().startswith("**a big santa spawned in street 1"):
         return
+    current_time = datetime.now()
+    minutes_until_next = 60 * 7
     role_mention = get_role_mention(guild, SEASONAL_EVENT_ROLE_NAME)
-    await alert_channel.send(f"{role_mention} Big Santa spawned in Street 1!")
+    next_event_time = get_next_event_time(current_time, minutes_until_next)
+    await alert_channel.send(f"{role_mention} Big Santa spawned in Street 1!  Next Big Santa at {next_event_time}")
 
 
 async def handle_halloween(message, guild, alert_channel):
