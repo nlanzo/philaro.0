@@ -1,6 +1,6 @@
 """Handle special game events and send alerts to the appropriate channels."""
 
-import datetime
+from datetime import datetime
 from constants import SEASONAL_EVENT_ROLE_NAME, HALLOWEEN, THANKSGIVING, CHRISTMAS, EASTER
 from utils import get_next_event_time, get_role_mention
 
