@@ -23,11 +23,16 @@ from channel_manager import setup_guild_infrastructure
 from special_events import handle_seasonal_event
 from admin_commands import handle_dm_commands
 from utils import get_role_mention
+from scheduler import AnnouncementScheduler
 
 
 async def handle_ready(bot, environment):
     """Handle when the bot is ready and connected"""
     print(f"ENVIRONMENT: {environment}")
+    
+    # Initialize the announcement scheduler
+    bot.scheduler = AnnouncementScheduler(bot)
+    print("Announcement scheduler initialized")
     
     # only setup on my test server in development
     if environment == "dev":
@@ -337,7 +342,9 @@ async def handle_message(bot, message, admin_id):
                     await handle_open_pvp_battle(message, guild, alert_channel)
                     await handle_outlaw(message, guild, alert_channel)
 
-                    await handle_seasonal_event(message, guild, alert_channel)
+                    # Pass scheduler if it exists (may not be initialized yet)
+                    scheduler = getattr(bot, 'scheduler', None)
+                    await handle_seasonal_event(message, guild, alert_channel, scheduler)
 
 
 

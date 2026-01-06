@@ -1,8 +1,9 @@
 """Handle special game events and send alerts to the appropriate channels."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from constants import SEASONAL_EVENT_ROLE_NAME, HALLOWEEN, THANKSGIVING, CHRISTMAS, EASTER
 from utils import get_next_event_time, get_role_mention
+from announcement_templates import ANNOUNCEMENT_TEMPLATES
 
 
 async def handle_friendly_hallowvern(message, guild, alert_channel):
@@ -49,7 +50,7 @@ async def handle_feast(message, guild, alert_channel):
     await alert_channel.send(f"{role_mention} A Thanksgiving Feast has been started!")
 
 
-async def handle_santa(message, guild, alert_channel):
+async def handle_santa(message, guild, alert_channel, scheduler=None):
     """
     Handle the "big santa spawned" special event.
     
@@ -57,14 +58,30 @@ async def handle_santa(message, guild, alert_channel):
         message: The Discord message object
         guild: The Discord guild object
         alert_channel: The channel to send the alert to
+        scheduler: Optional AnnouncementScheduler instance for scheduling announcements
     """
     if not message.content.lower().startswith("**a big santa spawned in street 1"):
         return
     current_time = datetime.now()
     minutes_until_next = 60 * 7
     role_mention = get_role_mention(guild, SEASONAL_EVENT_ROLE_NAME)
-    next_event_time = get_next_event_time(current_time, minutes_until_next)
-    await alert_channel.send(f"{role_mention} Big Santa spawned in Street 1!  Next Big Santa at {next_event_time}")
+    next_event_time_str = get_next_event_time(current_time, minutes_until_next)
+    await alert_channel.send(f"{role_mention} Big Santa spawned in Street 1!  Next Big Santa at {next_event_time_str}")
+    
+    # Schedule 15-minute advance announcement
+    if scheduler:
+        next_event_time = current_time + timedelta(minutes=minutes_until_next)
+        announcement_time = next_event_time - timedelta(minutes=15)
+        event_type = "big_santa"
+        
+        if event_type in ANNOUNCEMENT_TEMPLATES:
+            scheduler.schedule(
+                event_type=event_type,
+                announcement_time=announcement_time,
+                event_time=next_event_time,
+                role_name=SEASONAL_EVENT_ROLE_NAME,
+                message_template=ANNOUNCEMENT_TEMPLATES[event_type]
+            )
 
 
 async def handle_halloween(message, guild, alert_channel):
@@ -73,10 +90,10 @@ async def handle_halloween(message, guild, alert_channel):
 async def handle_thanksgiving(message, guild, alert_channel):
     await handle_feast(message, guild, alert_channel)
 
-async def handle_christmas(message, guild, alert_channel):
-    await handle_santa(message, guild, alert_channel)
+async def handle_christmas(message, guild, alert_channel, scheduler=None):
+    await handle_santa(message, guild, alert_channel, scheduler)
 
-async def handle_seasonal_event(message, guild, alert_channel):
+async def handle_seasonal_event(message, guild, alert_channel, scheduler=None):
     """
     Handle the seasonal event.
     
@@ -84,10 +101,11 @@ async def handle_seasonal_event(message, guild, alert_channel):
         message: The Discord message object
         guild: The Discord guild object
         alert_channel: The channel to send the alert to
+        scheduler: Optional AnnouncementScheduler instance for scheduling announcements
     """
     if HALLOWEEN:
         await handle_halloween(message, guild, alert_channel)
     elif THANKSGIVING:
         await handle_thanksgiving(message, guild, alert_channel)
     elif CHRISTMAS:
-        await handle_christmas(message, guild, alert_channel)
+        await handle_christmas(message, guild, alert_channel, scheduler)
