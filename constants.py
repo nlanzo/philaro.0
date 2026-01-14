@@ -11,6 +11,7 @@ HQWAR_ROLE_NAME = "rm2-alerts-hqwar"
 PVP_TOURNAMENT_ROLE_NAME = "rm2-alerts-pvpt"
 UNI_ROLE_NAME = "rm2-alerts-uni"
 BD_ROLE_NAME = "rm2-alerts-bd"
+BM_ROLE_NAME = "rm2-alerts-bm"
 BSIM_ROLE_NAME = "rm2-alerts-bsim"
 FV_ROLE_NAME = "rm2-alerts-fv"
 MI_ROLE_NAME = "rm2-alerts-mi"
@@ -21,7 +22,7 @@ OUTLAW_ROLE_NAME = "rm2-alerts-outlaw"
 SEASONAL_EVENT_ROLE_NAME = "rm2-alerts-seasonal-event"
 HALLOWEEN = False
 THANKSGIVING = False
-CHRISTMAS = True
+CHRISTMAS = False
 EASTER = False
 
 
@@ -32,7 +33,8 @@ ROLE_CONFIGS = [
     (PVP_TOURNAMENT_ROLE_NAME, "PvP Tournament", discord.Color.red(), "💪"),
     (OUTLAW_ROLE_NAME, "Player became an outlaw", discord.Color.red(), "👮"),
     (UNI_ROLE_NAME, "Uni / Uni Dungeon", discord.Color.blue(), "🎓"),
-    (BD_ROLE_NAME, "Battle Dimension / Battle Match", discord.Color.purple(), "⚔️"),
+    (BD_ROLE_NAME, "Battle Dimension", discord.Color.purple(), "⚔️"),
+    (BM_ROLE_NAME, "Battle Match", discord.Color.purple(), "🏈"),
     (BSIM_ROLE_NAME, "Battle Simulation", discord.Color.purple(), "🎮"),
     (FV_ROLE_NAME, "Freedom Village", discord.Color.blue(), "🏘️"),
     (MI_ROLE_NAME, "Monster Invasion", discord.Color.blue(), "👹"),

@@ -9,6 +9,7 @@ from event_handlers import (
     handle_pvp_tournament,
     handle_uni_events,
     handle_battle_dimension,
+    handle_battle_match,
     handle_battle_simulation,
     handle_freedom_village,
     handle_monster_invasion,
@@ -21,6 +22,7 @@ from constants import (
     PVP_TOURNAMENT_ROLE_NAME,
     UNI_ROLE_NAME,
     BD_ROLE_NAME,
+    BM_ROLE_NAME,
     BSIM_ROLE_NAME,
     FV_ROLE_NAME,
     MI_ROLE_NAME,
@@ -231,6 +233,39 @@ class TestHandleBattleDimension:
         
         await handle_battle_dimension(mock_message, mock_guild, mock_alert_channel)
         mock_alert_channel.send.assert_not_called()
+
+
+class TestHandleBattleMatch:
+    """Tests for handle_battle_match"""
+
+    @pytest.mark.asyncio
+    async def test_handles_battle_match_announcement(self, mock_guild, mock_alert_channel, mock_message, mock_role):
+        mock_message.content = "**battle match opens in 30 minutes!**"
+        mock_role.name = BM_ROLE_NAME
+        mock_guild.roles = [mock_role]
+        
+        with patch('event_handlers.get_role_mention', return_value=mock_role.mention):
+            await handle_battle_match(mock_message, mock_guild, mock_alert_channel)
+            mock_alert_channel.send.assert_called_once_with(
+                f"{mock_role.mention} Battle Match opens in 30 minutes!"
+            )
+
+    @pytest.mark.asyncio
+    async def test_ignores_non_matching_message(self, mock_guild, mock_alert_channel, mock_message):
+        mock_message.content = "Some random message"
+        
+        await handle_battle_match(mock_message, mock_guild, mock_alert_channel)
+        mock_alert_channel.send.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_case_insensitive(self, mock_guild, mock_alert_channel, mock_message, mock_role):
+        mock_message.content = "**BATTLE MATCH OPENS IN 30 MINUTES!**"
+        mock_role.name = BM_ROLE_NAME
+        mock_guild.roles = [mock_role]
+        
+        with patch('event_handlers.get_role_mention', return_value=mock_role.mention):
+            await handle_battle_match(mock_message, mock_guild, mock_alert_channel)
+            mock_alert_channel.send.assert_called_once()
 
 
 class TestHandleBattleSimulation:

@@ -1,6 +1,7 @@
 """Event handlers for Discord bot events"""
 import discord
 from constants import (
+    BM_ROLE_NAME,
     RM2_SERVER_ID, 
     DEV_SERVER_ID, 
     ALERTS_SETUP_CHANNEL_NAME, 
@@ -235,7 +236,7 @@ async def handle_battle_match(message, guild, alert_channel):
     if message.content.lower() != "**battle match opens in 30 minutes!**":
         return
 
-    role_mention = get_role_mention(guild, BD_ROLE_NAME)
+    role_mention = get_role_mention(guild, BM_ROLE_NAME)
     await alert_channel.send(f"{role_mention} Battle Match opens in 30 minutes!")
 
 async def handle_battle_simulation(message, guild, alert_channel):
