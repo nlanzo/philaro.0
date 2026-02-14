@@ -24,6 +24,7 @@ HALLOWEEN = False
 THANKSGIVING = False
 CHRISTMAS = False
 EASTER = False
+GIANT_KASHAM = True
 
 
 # role configs (ROLE_NAME, REASON, COLOR, EMOJI)

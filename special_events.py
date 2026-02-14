@@ -1,7 +1,7 @@
 """Handle special game events and send alerts to the appropriate channels."""
 
 from datetime import datetime, timedelta
-from constants import SEASONAL_EVENT_ROLE_NAME, HALLOWEEN, THANKSGIVING, CHRISTMAS, EASTER
+from constants import GIANT_KASHAM, SEASONAL_EVENT_ROLE_NAME, HALLOWEEN, THANKSGIVING, CHRISTMAS, EASTER
 from utils import get_next_event_time, get_role_mention
 from announcement_templates import ANNOUNCEMENT_TEMPLATES
 
@@ -84,6 +84,21 @@ async def handle_santa(message, guild, alert_channel, scheduler=None):
             )
 
 
+async def handle_giant_kasham(message, guild, alert_channel):
+    """
+    Handle the "giant kasham appeared" special event.
+    
+    Args:
+        message: The Discord message object
+        guild: The Discord guild object
+        alert_channel: The channel to send the alert to
+    """
+    if not message.content.lower().startswith("**kasham event is here to defeat the sun!"):
+        return
+    role_mention = get_role_mention(guild, SEASONAL_EVENT_ROLE_NAME)
+    await alert_channel.send(f"{role_mention} Kasham Shadow appeared in Battle Arena!")
+
+
 async def handle_halloween(message, guild, alert_channel):
     await handle_friendly_hallowvern(message, guild, alert_channel)
 
@@ -109,3 +124,5 @@ async def handle_seasonal_event(message, guild, alert_channel, scheduler=None):
         await handle_thanksgiving(message, guild, alert_channel)
     elif CHRISTMAS:
         await handle_christmas(message, guild, alert_channel, scheduler)
+    elif GIANT_KASHAM:
+        await handle_giant_kasham(message, guild, alert_channel)
