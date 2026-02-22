@@ -1,4 +1,6 @@
 """Event handlers for Discord bot events"""
+from datetime import datetime, timezone, timedelta
+
 import discord
 from constants import (
     BM_ROLE_NAME,
@@ -256,7 +258,11 @@ async def handle_freedom_village(message, guild, alert_channel):
         return
 
     role_mention = get_role_mention(guild, FV_ROLE_NAME)
-    await alert_channel.send(f"{role_mention} Freedom Village in 30 minutes!")
+    when = datetime.now(timezone.utc) + timedelta(minutes=30)
+    timestamp = int(when.timestamp())
+    await alert_channel.send(
+        f"{role_mention} Freedom Village in 30 minutes at <t:{timestamp}:f>!"
+    )
 
 
 async def handle_monster_invasion(message, guild, alert_channel):
